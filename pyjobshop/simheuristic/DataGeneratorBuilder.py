@@ -70,4 +70,8 @@ class DataGeneratorBuilder:
         DataGenerator
             A DataGenerator with the configured distributions and seed.
         """
-        return DataGenerator(self.distributions, self.constants)
+
+        # make (deep) copy of distributions to avoid shared state
+        distributions = {k: v.copy() for k, v in self.distributions.items()}
+
+        return DataGenerator(distributions, self.constants)

@@ -23,5 +23,5 @@ def evaluator(solution: Solution, data: Dict[str, int]) -> float:
 
     model = model_builder(data)
     model = fix_solution(solution, model)
-    results = model.solve()
+    results = model.solve(display=False)
     return results.objective

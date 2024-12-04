@@ -26,7 +26,19 @@ class DiscreteRV:
             The seed for the random number generator. Defaults to 0.
         """
         self.distribution = distribution
+        self.seed = seed
         self.rng = np.random.default_rng(seed)
+
+    def copy(self):
+        """
+        Creates a (deep)copy of the object.
+
+        Returns
+        -------
+        DiscreteRV
+            A copy of the random variable.
+        """
+        return DiscreteRV(self.distribution, self.seed)
 
     def rvs(self, size: int = 1) -> np.ndarray:
         """
@@ -105,7 +117,6 @@ class SeededPoisson(DiscreteRV):
             The seed for the random number generator. Defaults to 0.
         """
         super().__init__(poisson(mu=lam), seed)
-        self.lam = lam
 
 
 class Constant(DiscreteRV):
@@ -135,4 +146,3 @@ class Constant(DiscreteRV):
 
         # Call the parent class constructor with this custom distribution
         super().__init__(rv_discrete(name="constant", values=(xk, pk)), seed)
-        self.value = value
