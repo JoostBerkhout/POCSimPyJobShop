@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from ortools.sat.python.cp_model import (
     CpModel,
@@ -68,6 +68,7 @@ class Solver:
         display: bool = False,
         num_workers: Optional[int] = None,
         initial_solution: Optional[Solution] = None,
+        callback: Optional[Any] = None,
         **kwargs,
     ) -> Result:
         """
@@ -84,6 +85,8 @@ class Solver:
             available CPU cores are used.
         initial_solution
             Initial solution to start the solver from. Default is no solution.
+        callback
+            A callback that can be given to the solver.
         kwargs
             Additional parameters passed to the solver.
 
@@ -108,7 +111,11 @@ class Solver:
         for key, value in params.items():
             setattr(cp_solver.parameters, key, value)
 
-        status_code = cp_solver.solve(self._model)
+        # hacky: the intended callback needs the self for solution convertion
+        if callback is not None:
+            callback.set_solver(self)
+
+        status_code = cp_solver.solve(self._model, callback)
         status = cp_solver.status_name(status_code)
         objective_value = cp_solver.objective_value
 

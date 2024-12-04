@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pyjobshop.ProblemData import ProblemData
 from pyjobshop.Result import Result
@@ -13,6 +13,7 @@ def solve(
     display: bool = False,
     num_workers: Optional[int] = None,
     initial_solution: Optional[Solution] = None,
+    callback: Optional[Any] = None,
     **kwargs,
 ) -> Result:
     """
@@ -34,6 +35,8 @@ def solve(
         number of available CPU cores.
     initial_solution
         An initial solution to start the solver from. Default is no solution.
+    callback
+        A callback that can be given to the solver.
     kwargs
         Additional parameters passed to the solver.
 
@@ -55,6 +58,7 @@ def solve(
             display,
             num_workers,
             initial_solution,
+            callback,
             **kwargs,
         )
     elif solver == "cpoptimizer":

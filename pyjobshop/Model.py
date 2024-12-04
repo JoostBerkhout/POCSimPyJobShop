@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 
 import numpy as np
 
@@ -557,6 +557,7 @@ class Model:
         display: bool = True,
         num_workers: Optional[int] = None,
         initial_solution: Optional[Solution] = None,
+        callback: Optional[Any] = None,
         **kwargs,
     ) -> Result:
         """
@@ -578,6 +579,8 @@ class Model:
         initial_solution
             An initial solution to start the solver from. Default is no
             solution.
+        callback
+            A callback that can be given to the solver.
         kwargs
             Additional parameters passed to the solver.
 
@@ -594,5 +597,6 @@ class Model:
             display,
             num_workers,
             initial_solution,
+            callback,
             **kwargs,
         )
