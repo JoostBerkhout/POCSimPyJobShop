@@ -92,6 +92,15 @@ def model_builder(data: Dict[str, int]) -> Model:
         (i, j): data[f"setup_time_{i}_{j}"]
         for i, j in itertools.permutations(range(num_jobs), 2)
     }
+    objective_weights = {
+        "weight_makespan": data["weight_makespan"],
+        "weight_tardy_jobs": data["weight_tardy_jobs"],
+        "weight_total_flow_time": data["weight_total_flow_time"],
+        "weight_total_tardiness": data["weight_total_tardiness"],
+        "weight_total_earliness": data["weight_total_earliness"],
+        "weight_max_tardiness": data["weight_max_tardiness"],
+        "weight_max_lateness": data["weight_max_lateness"],
+    }
 
     # Create model
     model = Model()
@@ -111,6 +120,9 @@ def model_builder(data: Dict[str, int]) -> Model:
             model.add_setup_time(
                 machine, task1, task2, duration=setup_times[idx1, idx2]
             )
+
+    # Set objective
+    model.set_objective(**objective_weights)
 
     return model
 

@@ -60,6 +60,13 @@ class DataGeneratorBuilder:
             self.constants[f"setup_time_{i}_{j}"] = setup_time
         for i, due_date in enumerate(due_dates):
             self.constants[f"due_date_{i}"] = due_date
+        self.constants["weight_makespan"] = 1
+        self.constants["weight_tardy_jobs"] = 0
+        self.constants["weight_total_flow_time"] = 0
+        self.constants["weight_total_tardiness"] = 100
+        self.constants["weight_total_earliness"] = 0
+        self.constants["weight_max_tardiness"] = 0
+        self.constants["weight_max_lateness"] = 0
 
     def build(self) -> DataGenerator:
         """

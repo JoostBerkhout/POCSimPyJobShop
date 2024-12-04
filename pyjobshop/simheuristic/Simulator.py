@@ -60,6 +60,18 @@ class Simulator:
             self.results.append(result)
 
     @property
+    def num_sims(self) -> int:
+        """
+        Returns the number of simulation runs.
+
+        Returns
+        -------
+        int
+            The number of simulation runs.
+        """
+        return len(self.results)
+
+    @property
     def mean(self) -> float:
         """
         Computes the mean of the simulation results.

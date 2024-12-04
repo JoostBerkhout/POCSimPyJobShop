@@ -4,30 +4,36 @@ import numpy as np
 from DataGeneratorBuilder import DataGeneratorBuilder
 
 from pyjobshop import Result
+from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
+from pyjobshop.simheuristic.evaluator import evaluator
 from pyjobshop.simheuristic.modeling import (
     fix_solution,
     model_builder,
     model_builder_fix_sol,
 )
+from pyjobshop.simheuristic.Simulator import Simulator
+from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
 
 
-def print_results(result: Result, duration: float) -> None:
-    print(f"\nObjective value = {result.objective}")
-    schedule = list(np.argsort([t.start for t in result.best.tasks]))
+def print_results(_result: Result, _duration: float) -> None:
+    print(f"\nObjective value = {_result.objective}")
+    schedule = list(np.argsort([t.start for t in _result.best.tasks]))
     print(f"Schedule = {schedule}")
-    start_times = [result.best.tasks[t].start for t in schedule]
+    start_times = [_result.best.tasks[t].start for t in schedule]
     print(f"Start times of tasks = {start_times}")
-    print(f"The code took {round(duration, 3)} seconds to run.")
+    print(f"The code took {round(_duration, 3)} seconds to run.")
 
 
 # test the DataGeneratorBuilder
 builder = DataGeneratorBuilder()
 data_generator = builder.build()
-print(data_generator.random())
-print(data_generator.int_mean())
+print("Random data: ", data_generator.random())
+print("Mean data: ", data_generator.int_mean())
+data_generator = builder.build()
+print("Random data: ", data_generator.random())
+print("Mean data: ", data_generator.int_mean())
 
 # test the model_builder (without solution given)
-# time the following code snippet
 start_time = time.time()
 data = data_generator.int_mean()
 model = model_builder_fix_sol(data)
@@ -45,6 +51,15 @@ result = model.solve(display=False)
 duration = time.time() - start_time
 print_results(result, duration)
 
+# test the model_builder (without solution given)
+start_time = time.time()
+data = data_generator.int_mean()
+model = model_builder(data)
+model.set_objective(weight_total_tardiness=1000, weight_makespan=1)
+result = model.solve(display=False)
+duration = time.time() - start_time
+print_results(result, duration)
+
 # test the model_builder (with solution given)
 start_time = time.time()
 data = data_generator.int_mean()
@@ -54,3 +69,59 @@ model.set_objective(weight_total_earliness=1000, weight_makespan=1)
 result = model.solve(display=False)
 duration = time.time() - start_time
 print_results(result, duration)
+
+# simulate solution
+simulator = Simulator(data_generator, result.best, evaluator)
+start_time = time.time()
+simulator.simulate(10)
+duration = time.time() - start_time
+print(f"\nThe simiulation took {round(duration, 3)} seconds to run.")
+print(f"Number of simulation runs = {simulator.num_sims}")
+print(f"Mean of simulation results = {simulator.mean}")
+print(f"Variance of simulation results = {simulator.variance}")
+print(f"Simulation results = {simulator.results}")
+
+# test EliteSolution
+solutions = EliteSolutions()
+solutions.add(result.best, simulator, result.objective)
+print(solutions.get_best_solution())
+
+# test callback
+start_time = time.time()
+data = data_generator.int_mean()
+model = model_builder(data)
+model.set_objective(weight_total_earliness=1000, weight_makespan=1)
+num_sims = 7
+callback = SolutionCallback(builder, evaluator, num_sims)
+result = model.solve(callback=callback, display=False)
+duration = time.time() - start_time
+print_results(result, duration)
+callback.solutions.print_summary()
+
+# test whether simulation results coincide
+for solution, simulator, objective in callback.solutions.solutions.values():
+    data = data_generator.int_mean()
+    model = model_builder(data)
+    model = fix_solution(solution, model)
+    model.set_objective(weight_total_earliness=1000, weight_makespan=1)
+    result = model.solve(display=False)
+    assert result.objective == objective
+
+    data_generator = builder.build()
+    new_simulator = Simulator(data_generator, solution, evaluator)
+    new_simulator.simulate(num_sims)
+    assert new_simulator.num_sims == simulator.num_sims
+    assert new_simulator.mean == simulator.mean
+    assert new_simulator.variance == simulator.variance
+
+    new_simulator.simulate(3)
+    assert new_simulator.num_sims != simulator.num_sims
+    assert new_simulator.mean != simulator.mean
+    assert new_simulator.variance != simulator.variance
+
+    simulator.simulate(3)
+    assert new_simulator.num_sims == simulator.num_sims
+    assert new_simulator.mean == simulator.mean
+    assert new_simulator.variance == simulator.variance
+
+print("Test passed: All simulation results coincide.")
