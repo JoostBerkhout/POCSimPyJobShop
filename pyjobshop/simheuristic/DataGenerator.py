@@ -5,7 +5,8 @@ from pyjobshop.simheuristic.DiscreteRV import DiscreteRV
 
 class DataGenerator:
     """
-    Generates random data, mean data, or quantile data based on distributions.
+    Generates data based on data distributions and constant data. It can return
+    random, mean, or quantile data regarding the data with distributions.
 
     Attributes
     ----------

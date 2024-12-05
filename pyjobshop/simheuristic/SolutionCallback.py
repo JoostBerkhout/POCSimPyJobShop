@@ -2,7 +2,7 @@ from typing import Callable, Dict
 
 from ortools.sat.python import cp_model
 
-from pyjobshop import Solution
+from pyjobshop import Model, Solution
 from pyjobshop.simheuristic.DataGeneratorBuilder import DataGeneratorBuilder
 from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
 from pyjobshop.simheuristic.Simulator import Simulator
@@ -16,11 +16,16 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
 
     def __init__(
         self,
+        model_fun: Callable[[Dict[str, int]], Model],
         data_generator_builder: DataGeneratorBuilder,
-        evaluator: Callable[[Solution, Dict], float],
+        evaluator: Callable[
+            [Solution, Callable[[Dict[str, int]], Model], Dict[str, int]],
+            float,
+        ],
         num_sims: int,
     ):
         cp_model.CpSolverSolutionCallback.__init__(self)
+        self.model_fun = model_fun
         self.data_generator_builder = data_generator_builder
         self.evaluator = evaluator
         self.num_sims = num_sims
@@ -41,6 +46,8 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
 
         solution = self.solver._convert_to_solution(self)
         data_generator = self.data_generator_builder.build()  # CRN
-        simulator = Simulator(data_generator, solution, self.evaluator)
+        simulator = Simulator(
+            self.model_fun, data_generator, solution, self.evaluator
+        )
         simulator.simulate(self.num_sims)
         self.solutions.add(solution, simulator, self.objective_value)
