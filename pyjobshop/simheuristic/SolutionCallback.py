@@ -1,11 +1,9 @@
-from typing import Callable, Dict
-
 from ortools.sat.python import cp_model
 
-from pyjobshop import Model, Solution
-from pyjobshop.simheuristic.DataGeneratorBuilder import DataGeneratorBuilder
 from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
+from pyjobshop.simheuristic.problems.Problem import Problem
 from pyjobshop.simheuristic.Simulator import Simulator
+from pyjobshop.simheuristic.utils import find_schedule_per_resource
 from pyjobshop.solvers.ortools.Solver import Solver
 
 
@@ -14,20 +12,9 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
     Callback class that stores solutions found by ortools solver.
     """
 
-    def __init__(
-        self,
-        model_fun: Callable[[Dict[str, int]], Model],
-        data_generator_builder: DataGeneratorBuilder,
-        evaluator: Callable[
-            [Solution, Callable[[Dict[str, int]], Model], Dict[str, int]],
-            float,
-        ],
-        num_sims: int,
-    ):
+    def __init__(self, problem: Problem, num_sims: int):
         cp_model.CpSolverSolutionCallback.__init__(self)
-        self.model_fun = model_fun
-        self.data_generator_builder = data_generator_builder
-        self.evaluator = evaluator
+        self.problem = problem
         self.num_sims = num_sims
         self.solutions = EliteSolutions()
         self.solver: Solver | None = None
@@ -45,9 +32,18 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         """
 
         solution = self.solver._convert_to_solution(self)
-        data_generator = self.data_generator_builder.build()  # CRN
-        simulator = Simulator(
-            self.model_fun, data_generator, solution, self.evaluator
-        )
-        simulator.simulate(self.num_sims)
-        self.solutions.add(solution, simulator, self.objective_value)
+        schedule = find_schedule_per_resource(solution)
+        if self.solutions.is_new_schedule(schedule):
+            simulator = Simulator(self.problem, solution)
+            simulator.simulate(self.num_sims)
+            metadata = {
+                "current_time": self.WallTime(),
+                "current_bound": self.best_objective_bound,
+            }
+            self.solutions.add(
+                solution=solution,
+                simulator=simulator,
+                objective=self.objective_value,
+                schedule=schedule,
+                metadata=metadata,
+            )

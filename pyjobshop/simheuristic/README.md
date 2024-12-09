@@ -1,14 +1,17 @@
 # Simheuristic for PyJobShop
 
-This package provide code for a simheuristic approach in combination with
-PyJobShop. It tries to follow the model and data separation paradigm as
-used in algebraic modeling languages. The user can specify the scheduling model 
-in `modeling.model_builder` and the corresponding (simulation) data in 
-`DataGeneratorBuilder`. The scheduling model `modeling.model_builder` will
-then load the data via a `DataGenerator` build via `DataGeneratorBuilder`. 
+This package provides code for solving stochastic PyJobShop scheduling problems
+using simheuristics. It tries to follow the model and data separation paradigm 
+from algebraic modeling languages. 
+
+For each problem the user wants to solve with simheuristics, the user has to 
+specify a problem `.py` script in the `problems` subpackage. This script should
+contain a function that generates a concrete model based on data, and a 
+data function that simulates problem data (of a type that can be used in the
+model function to make a concrete model).
+
 The script `test_simheuristic.py` is used to test the code and demonstrates
 how it can be used for simulation and optimization.
-
 
 ## Discussed design with Leon Lan on 3-12-2024
 

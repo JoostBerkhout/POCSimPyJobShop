@@ -1,62 +1,37 @@
-from typing import Callable, Dict, List
+from typing import List
 
 import numpy as np
 
-from pyjobshop import Model, Solution
-from pyjobshop.simheuristic.DataGenerator import DataGenerator
+from pyjobshop import Solution
+from pyjobshop.simheuristic.evaluator import evaluator
+from pyjobshop.simheuristic.problems.Problem import Problem
 
 
 class Simulator:
     """
-    Simulates a solution's performance using data from a generator.
+    Simulates a solution's performance for a problem.
 
     Attributes
     ----------
-    model_fun
-        A function that returns a pyjobshop.Model instance for data.
-    data_generator : DataGenerator
-        Instance of DataGenerator to generate input data.
+    problem
+        Problem representation.
     solution : Solution
         A callable representing the solution to be evaluated.
-    evaluator : Callable[[Solution, Callable, Dict], float]
-        A function to evaluate the solution on generated data.
+    data_generator : DataGenerator
+        Instance of DataGenerator to generate input data.
     results : List[float]
         List of results from simulation runs.
     """
 
-    def __init__(
-        self,
-        model_fun: Callable[[Dict[str, int]], Model],
-        data_generator: DataGenerator,
-        solution: Solution,
-        evaluator: Callable[
-            [Solution, Callable[[Dict[str, int]], Model], Dict[str, int]],
-            float,
-        ],
-    ) -> None:
-        """
-        Initializes the Simulator.
-
-        Parameters
-        ----------
-        model_fun
-            A function that returns a pyjobshop.Model instance for data.
-        data_generator : DataGenerator
-            The data generator to produce input data.
-        solution : Solution
-            The solution to be evaluated.
-        evaluator : Callable[[Solution, Dict], float]
-            The evaluation function that computes the objective value.
-        """
-        self.model_fun = model_fun
-        self.data_generator = data_generator
+    def __init__(self, problem: Problem, solution: Solution):
+        self.problem = problem
         self.solution = solution
-        self.evaluator = evaluator
+        self.data_generator = problem.build_data_generator()
         self.results: List[float] = []
 
-    def simulate(self, num_sims: int) -> None:
+    def simulate(self, num_sims: int):
         """
-        Performs multiple simulation runs and stores the results.
+        Performs num_sims simulation runs and stores the results.
 
         Parameters
         ----------
@@ -65,7 +40,7 @@ class Simulator:
         """
         for _ in range(num_sims):
             data = self.data_generator.random()
-            result = self.evaluator(self.solution, self.model_fun, data)
+            result = evaluator(self.solution, self.problem, data)
             self.results.append(result)
 
     @property

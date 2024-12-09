@@ -42,6 +42,8 @@ class Model:
         self._id2resource: dict[int, int] = {}
         self._id2task: dict[int, int] = {}
 
+        self._map_to_old_mode: dict = {}  # hacky: used in fix_solution()
+
     @property
     def jobs(self) -> list[Job]:
         """

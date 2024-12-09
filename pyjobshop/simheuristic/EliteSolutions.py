@@ -1,36 +1,127 @@
-from typing import Dict, Tuple
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from pyjobshop import Solution
 from pyjobshop.simheuristic.Simulator import Simulator
+from pyjobshop.simheuristic.utils import find_schedule_per_resource
+
+
+@dataclass
+class EliteSolution:
+    """
+    Represents a solution with associated simulator, objective, and metadata.
+
+    Attributes
+    ----------
+    solution : Solution
+        The solution object.
+    simulator : Simulator
+        The simulator associated with the solution.
+    objective : float
+        The objective value of the solution.
+    schedule : dict[int, list[int]]
+        A dictionary mapping resource indices to scheduled task indices, resp.
+    metadata : Dict[str, Any]
+        Additional attributes of the solution (e.g., lower bounds).
+    """
+
+    solution: Solution
+    simulator: Simulator
+    objective: float
+    schedule: dict[int, list[int]]
+    metadata: Dict[str, Any]
 
 
 class EliteSolutions:
     """
-    Manages solutions and their associated simulators.
+    Manages elite solutions.
 
     Attributes
     ----------
-    solutions : Dict[int, Tuple[Solution, Simulator, float]]
-        A mapping from solution ids to their solution, simulator & objective.
+    elite_solutions : Dict[int, EliteSolution]
+        A mapping from solution IDs to EliteSolution objects.
     """
 
     def __init__(self) -> None:
-        self.solutions: Dict[int, Tuple[Solution, Simulator, float]] = {}
+        self.elite_solutions: Dict[int, EliteSolution] = {}
 
-    def add(self, solution: Solution, simulator: Simulator, objective: float):
+    def add(
+        self,
+        solution: Solution,
+        simulator: Simulator,
+        objective: float,
+        schedule: Optional[dict[int, list[int]]] = None,
+        **metadata: Any,
+    ) -> None:
         """
-        Adds a solution and its simulator to the storage.
+        Adds a new solution.
 
         Parameters
         ----------
         solution : Solution
-            The solution to add.
+            The solution object to add.
         simulator : Simulator
             The simulator associated with the solution.
         objective : float
-            The objective value of the solution when found.
+            The objective value of the solution.
+        schedule : Optional[dict[int, list[int]]]
+            Maps resource indices to scheduled task indices.
+        **metadata : Any
+            Additional metadata for the solution.
         """
-        self.solutions[id(solution)] = (solution, simulator, objective)
+        if schedule is None:
+            schedule = find_schedule_per_resource(solution)
+
+        self.elite_solutions[id(solution)] = EliteSolution(
+            solution=solution,
+            simulator=simulator,
+            objective=objective,
+            schedule=schedule,
+            metadata=metadata,
+        )
+
+    def is_new_schedule(self, schedule: Dict[int, list[int]]) -> bool:
+        """
+        Checks if schedule is new.
+
+        Parameters
+        ----------
+        schedule : Dict[int, list[int]]
+            Maps resource indices to scheduled task indices.
+
+        Returns
+        -------
+        bool
+            True if the schedule is new, otherwise False.
+        """
+        for elite_solution in self.elite_solutions.values():
+            if schedule == elite_solution.schedule:
+                return False
+        return True
+
+    def keep_top_n(self, n: int):
+        """
+        Keeps only the top n solutions with the lowest mean objective.
+
+        Parameters
+        ----------
+        n : int
+            The maximum number of solutions to retain.
+        """
+        if len(self.elite_solutions) <= n:
+            return
+
+        # Sort solutions by objective value
+        sorted_solutions = sorted(
+            self.elite_solutions.values(),
+            key=lambda elite_solution: elite_solution.simulator.mean,
+        )
+
+        # Retain only the top N solutions
+        self.elite_solutions = {
+            id(elite_solution.solution): elite_solution
+            for elite_solution in sorted_solutions[:n]
+        }
 
     def get_best_solution(self) -> Solution:
         """
@@ -41,16 +132,20 @@ class EliteSolutions:
         Solution
             The best-performing solution.
         """
-        return min(self.solutions.values(), key=lambda val: val[1].mean)[0]
+        best_elite_solution = min(
+            self.elite_solutions.values(),
+            key=lambda elite_solution: elite_solution.simulator.mean,
+        )
+        return best_elite_solution.solution
 
     def print_summary(self) -> None:
         """Prints a summary of the elite solutions."""
-
         print("\nElite Solutions:")
-        for solution, simulator, objective in self.solutions.values():
+        for elite_solution in self.elite_solutions.values():
             print(
-                f"Solution id: {id(solution)} | "
-                f"Objective: {objective:.2f} | "
-                f"Mean: {simulator.mean:.2f} | "
-                f"Var: {simulator.variance:.2f}"
+                f"Solution id: {id(elite_solution.solution)} | "
+                f"Objective: {elite_solution.objective:.2f} | "
+                f"Metadata: {elite_solution.metadata} | "
+                f"Mean: {elite_solution.simulator.mean:.2f} | "
+                f"Var: {elite_solution.simulator.variance:.2f}"
             )
