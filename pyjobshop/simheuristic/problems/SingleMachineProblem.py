@@ -67,7 +67,8 @@ class SingleMachineProblem(Problem):
         constants: Dict[str, int] = {}
 
         num_jobs = 10
-        max_rand_mean = 10
+        loc = 1
+        max_rand_mean = 10 - loc
         seed = 0
 
         # job durations
@@ -76,7 +77,7 @@ class SingleMachineProblem(Problem):
         for i in range(num_jobs):
             mean_job_duration = np.random.randint(max_rand_mean)
             mean_job_durations.append(mean_job_duration)
-            gen = SeededPoisson(lam=mean_job_duration, seed=i)
+            gen = SeededPoisson(lam=mean_job_duration, loc=loc, seed=i)
             distributions[f"duration_{i}"] = gen
 
         # setup times

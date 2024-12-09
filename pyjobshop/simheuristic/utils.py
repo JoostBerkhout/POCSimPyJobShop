@@ -6,6 +6,8 @@ from pyjobshop import Solution
 def find_schedule_per_resource(solution: Solution) -> Dict[int, list[int]]:
     """
     Returns a dictionary mapping resource indices to schedule of task indices.
+
+    Warning: if tasks start times are equal, the order is not guaranteed.
     """
 
     schedule_per_resource: dict[int, list[int]] = {}

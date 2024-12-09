@@ -98,14 +98,9 @@ class DiscreteRV:
 class SeededPoisson(DiscreteRV):
     """
     A seeded Poisson random variable.
-
-    Attributes
-    ----------
-    lam : float
-        The lambda (rate parameter) of the Poisson distribution.
     """
 
-    def __init__(self, lam: float, seed: int = 0) -> None:
+    def __init__(self, lam: float, loc: int = 0, seed: int = 0) -> None:
         """
         Initializes the Poisson random variable.
 
@@ -113,10 +108,12 @@ class SeededPoisson(DiscreteRV):
         ----------
         lam : float
             The lambda (rate parameter) of the Poisson distribution.
+        loc : int
+            The location parameter of the Poisson distribution.
         seed : int, optional
             The seed for the random number generator. Defaults to 0.
         """
-        super().__init__(poisson(mu=lam), seed)
+        super().__init__(poisson(mu=lam, loc=loc), seed)
 
 
 class Constant(DiscreteRV):

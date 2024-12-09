@@ -53,7 +53,18 @@ def test_seeded_poisson_rvs():
     samples = sp.rvs(size=10)
     assert isinstance(samples, np.ndarray)
     assert len(samples) == 10
-    assert np.mean(samples) == pytest.approx(lam, rel=0.2)
+    assert np.mean(samples) == pytest.approx(lam, rel=0.1)
+
+
+def test_seeded_loc_poisson_rvs():
+    lam = 7
+    loc = 5
+    sp = SeededPoisson(lam=lam, loc=loc, seed=0)
+
+    samples = sp.rvs(size=10)
+    assert isinstance(samples, np.ndarray)
+    assert len(samples) == 10
+    assert np.mean(samples) == pytest.approx(lam + loc, rel=0.1)
 
 
 def test_seeded_poisson_mean_var():
