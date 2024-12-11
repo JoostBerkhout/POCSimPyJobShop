@@ -68,7 +68,7 @@ class SingleMachineProblem(Problem):
 
         num_jobs = 10
         loc = 1
-        max_rand_mean = 10 - loc
+        max_rand_mean = 10
         seed = 0
 
         # job durations
@@ -87,7 +87,7 @@ class SingleMachineProblem(Problem):
         }
 
         # calculate meaningful due dates
-        durations = mean_job_durations
+        durations = [x + loc for x in mean_job_durations]
         due_dates = [0]  # dummy, will be removed later
         for j in range(num_jobs - 1):
             due_date = due_dates[-1] + durations[j] + setup_times[j, j + 1]

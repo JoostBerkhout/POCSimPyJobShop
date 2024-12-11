@@ -2,6 +2,7 @@ import itertools
 from typing import Dict, Optional
 
 from pyjobshop import Machine, Model, Solution
+from pyjobshop.simheuristic.problems.Problem import Problem
 from pyjobshop.simheuristic.utils import find_schedule_per_resource
 
 
@@ -52,6 +53,27 @@ def fix_solution(solution: Solution, model: Model) -> Model:
             model.add_end_before_start(task1, task2)
 
     return model
+
+
+def find_solution_for_other_data(
+    solution: Solution, problem: Problem, data: Dict[str, int]
+) -> Solution:
+    """
+    Transforms the given solution to a new solution that suits that data given
+    for the problem at hand. In particular, the new start and end times of
+    all the tasks are adjusted to the new data.
+    """
+
+    model = problem.concrete_model(data)
+    model = fix_solution(solution, model)
+    results = model.solve(display=False)
+    new_solution = results.best
+
+    # Reset mode choices to original mode indices
+    for task in new_solution.tasks:
+        task.mode = model._map_to_old_mode[task.mode]
+
+    return new_solution
 
 
 def model_builder_fix_sol(

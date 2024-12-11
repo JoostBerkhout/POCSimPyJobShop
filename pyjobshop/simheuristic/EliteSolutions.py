@@ -138,14 +138,14 @@ class EliteSolutions:
         )
         return best_elite_solution.solution
 
-    def print_summary(self) -> None:
+    def print_summary(self):
         """Prints a summary of the elite solutions."""
         print("\nElite Solutions:")
         for elite_solution in self.elite_solutions.values():
             print(
                 f"Solution id: {id(elite_solution.solution)} | "
                 f"Objective: {elite_solution.objective:.2f} | "
-                f"Metadata: {elite_solution.metadata} | "
                 f"Mean: {elite_solution.simulator.mean:.2f} | "
-                f"Var: {elite_solution.simulator.variance:.2f}"
+                f"Var: {elite_solution.simulator.variance:.2f} | "
+                f"Metadata: {elite_solution.metadata}"
             )
