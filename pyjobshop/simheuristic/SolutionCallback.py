@@ -1,3 +1,4 @@
+import wandb
 from ortools.sat.python import cp_model
 
 from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
@@ -33,6 +34,13 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
 
         solution = self.solver._convert_to_solution(self)
         schedule = find_schedule_per_resource(solution)
+        if wandb.run is not None:
+            wandb.log(
+                {
+                    "Objective new candidate": self.objective_value,
+                    "Current bound": self.best_objective_bound,
+                }
+            )
         if self.solutions.is_new_schedule(schedule):
             simulator = Simulator(self.problem, solution)
             simulator.simulate(self.num_sims)
@@ -47,3 +55,11 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                 schedule=schedule,
                 metadata=metadata,
             )
+            if wandb.run is not None:
+                best_elite_sol = self.solutions.get_best_elite_solution()
+                wandb.log(
+                    {
+                        "Mean objective new candidate": simulator.mean,
+                        "Best mean objective": best_elite_sol.simulator.mean,
+                    }
+                )
