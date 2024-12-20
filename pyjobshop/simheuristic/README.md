@@ -1,14 +1,18 @@
 # Simheuristic for PyJobShop
 
 This package provides code for solving stochastic PyJobShop scheduling problems
-using simheuristics. It tries to follow the model and data separation paradigm 
-from algebraic modeling languages. 
+using simheuristics. By fixing solutions in PyJobShop, it allows to "simulate"
+solutions for randomly generated data. 
 
-For each problem the user wants to solve with simheuristics, the user has to 
-specify a problem `.py` script in the `problems` subpackage. This script should
-contain a function that generates a concrete model based on data, and a 
-data function that simulates problem data (of a type that can be used in the
-model function to make a concrete model).
+For each stochastic PyJobShop problem the user wants to solve with 
+simheuristics, the user has to make a class in subfolder `problems` that
+inherits `Problem`. The user has to overwrite:
+
+- `Problem.conrete_model()` with the concrete model for concrete `data`.
+- `Problem.distribution_data()` that returns the distribution and constant data.
+
+It tries to follow the model and data separation paradigm
+from algebraic modeling languages.
 
 The script `test_simheuristic.py` is used to test the code and demonstrates
 how it can be used for simulation and optimization.
