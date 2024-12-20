@@ -83,7 +83,20 @@ def test_get_best_solution(elite_solutions, mock_solution, mock_simulator):
     # Add the best solution
     elite_solutions.add(best_solution, best_simulator, 5.0, {0: [0, 1]})
 
-    assert elite_solutions.get_best_solution() == best_solution
+    assert elite_solutions.get_best_elite_solution().solution == best_solution
+
+
+def test_get_worst_solution(elite_solutions, mock_solution, mock_simulator):
+    """Test retrieving the worst solution."""
+    for i in range(3):
+        solution = Mock(spec=Solution)
+        simulator = Mock(spec=Simulator)
+        simulator.mean = 11.0 + i  # Higher mean is worse
+        elite_solutions.add(solution, simulator, 10.0, {0: [0, 1]})
+
+    worst_solution = elite_solutions.get_worst_elite_solution().solution
+
+    assert worst_solution == solution
 
 
 def test_is_new_schedule(elite_solutions, mock_solution, mock_simulator):
