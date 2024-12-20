@@ -15,6 +15,7 @@ def plot_machine_gantt(
     data: ProblemData,
     resources: Optional[list[int]] = None,
     plot_labels: bool = False,
+    title: str = "Solution",
     ax: Optional[Axes] = None,
 ):
     """
@@ -32,6 +33,8 @@ def plot_machine_gantt(
         (from top to bottom). Defaults to all resources in the data instance.
     plot_labels
         Whether to plot the task names as labels.
+    title
+        The title of the plot.
     ax
         Axes object to draw the plot on. One will be created if not provided.
     """
@@ -87,4 +90,4 @@ def plot_machine_gantt(
 
     ax.set_xlim(0, ax.get_xlim()[1])  # start time at zero
     ax.set_xlabel("Time")
-    ax.set_title("Solution")
+    ax.set_title(title)
