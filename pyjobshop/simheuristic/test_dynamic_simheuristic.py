@@ -9,6 +9,7 @@ from pyjobshop.simheuristic.problems.SingleMachineProblem import (
 )
 from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
 
+use_wandb = False
 quantiles = [0.4, 0.5, 0.6, 0.7]
 # the type checker prevents adding quantiles to config...
 config: dict[str, int] = {
@@ -22,12 +23,13 @@ config: dict[str, int] = {
     "consider_mean": int(True),
 }
 
-# Init wandb
-wandb.init(
-    project="simheuristics-pyjobshop",  # where it will be logged
-    name="dynamic_simheuristic",  # name of the run
-    config=config,  # log config
-)
+if use_wandb:
+    # Init wandb
+    wandb.init(
+        project="simheuristics-pyjobshop",  # where it will be logged
+        name="dynamic_simheuristic",  # name of the run
+        config=config,  # log config
+    )
 
 # Set problem
 problem = SingleMachineProblem()
@@ -50,21 +52,31 @@ callback = SolutionCallback(problem, num_sims=config["num_init_sims"])
 start_time = time.time()
 time_spend = time.time() - start_time
 current_solution = None
+old_data_key = None
 
 while time_spend < config["max_time_secs"]:
     # Randomly select data based on scores
     probs = np.array(list(scores.values())) / sum(scores.values())
     data_key = np.random.choice(list(scores.keys()), p=list(probs))
-    data = concrete_data[data_key]
 
-    if current_solution is not None:
-        # Update current solution for new data
-        current_solution = find_solution_for_other_data(
-            current_solution, problem, data
-        )
+    # Update data if needed
+    new_data = data_key != old_data_key
+    if new_data:
+        old_data_key = data_key
+        data = concrete_data[data_key]
 
-    # Solve the problem warmstarting with the current solution
+        if current_solution is not None:
+            # Update current solution for new data
+            current_solution = find_solution_for_other_data(
+                current_solution, problem, data
+            )
+
+    # Solve the problem while warmstarting with the current solution
     model = problem.concrete_model(data)
+    """
+    Perhaps it is faster to store the concrete models instead of the data
+    and creating the concrete models every time?
+    """
     time_limit = min(
         config["max_time_secs"] - time_spend,
         config["max_time_per_cp_solve"],
