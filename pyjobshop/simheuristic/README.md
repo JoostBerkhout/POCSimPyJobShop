@@ -12,10 +12,11 @@ inherits `Problem`. The user has to overwrite:
 - `Problem.distribution_data()` that returns the distribution and constant data.
 
 It tries to follow the model and data separation paradigm
-from algebraic modeling languages.
+from algebraic modeling languages. See the `problems` folder for examples.
 
-The script `test_simheuristic.py` is used to test the code and demonstrates
-how it can be used for simulation and optimization.
+The script `test_simheuristic.py` demonstrates how a static simheuristic 
+can be used for a specified problem. The script `test_simheuristic_dynamic.py`
+demonstrates how a dynamic simheuristic can be used for a specified problem.
 
 ## Discussed design with Leon Lan on 3-12-2024
 
