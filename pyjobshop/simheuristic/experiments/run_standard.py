@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import wandb
+import pandas as pd
 
 from pyjobshop.simheuristic.Simulator import Simulator
 from pyjobshop.plot import plot_machine_gantt
@@ -11,8 +12,9 @@ from pyjobshop.simheuristic.utils import save_elite_solutions_to_csv
 This is a static / standard SimHeuristic implementation
 """
 
-use_wandb = True
+use_wandb = False
 save_to_csv = False
+data_list = []
 project_name = "simheuristics-sensitivity"
 method_name = "standard"
 problem_name = "HybridFlowShop"
@@ -23,7 +25,7 @@ for (j, k) in [(30, 30)]:
             config: dict[str, int] = {
                 "num_sims": eta,
                 "time_limit": beta,
-                "num_sims_long": 1000,
+                "num_sims_long": 5000,
                 "enumerate": 0,
                 "num_jobs": j,
                 "num_stages": k
@@ -66,13 +68,19 @@ for (j, k) in [(30, 30)]:
             simulator_best_sol = Simulator(problem, best_stoch_solution)
             simulator_best_sol.simulate(config["num_sims_long"])
             print(f'Mean value after long simulation {simulator_best_sol.mean}')
-            # TODO: simulate for 5000 simulations to obtain true value
-            for title, solution in plot_solutions.items():
-                plot_machine_gantt(solution, model.data(), title=title, plot_labels=True)
-                plt.show()
 
             if use_wandb:
                 wandb.log({"final_best": simulator_best_sol.mean})
 
             if use_wandb:
                 wandb.finish()
+
+            data_list.append({ "num_sims": eta,
+                "time_limit": beta,
+                "num_jobs": j,
+                "num_stages": k,
+                "final_best": simulator_best_sol.mean,
+                "method": "standard"})
+
+            data_df = pd.DataFrame(data_list)
+            data_df.to_csv("results/sensitivity_standard.csv")

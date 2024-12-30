@@ -23,7 +23,7 @@ problem_name = "HybridFlowShop"
 config: dict[str, int] = {
     "num_sims": 25,
     "time_limit": 3600,
-    "num_sims_long": 1
+    "num_sims_long": 5000
 }
 
 for (j, k) in [(5, 5), (10, 5), (10, 10), (20, 10), (20, 20),
@@ -76,10 +76,6 @@ for (j, k) in [(5, 5), (10, 5), (10, 10), (20, 10), (20, 20),
 
     print(f'Mean value after long simulation: {simulator_best_sol.mean}')
     print(f'Simulation time: {finish_simulation - start_simulation}')
-    # TODO: simulate for 5000 simulations to obtain true value
-    for title, solution in plot_solutions.items():
-        plot_machine_gantt(solution, model.data(), title=title, plot_labels=True)
-        plt.show()
 
     if use_wandb:
         wandb.log({"final_best": simulator_best_sol.mean})

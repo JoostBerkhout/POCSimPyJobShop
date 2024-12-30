@@ -1,5 +1,5 @@
 import time
-
+import pandas as pd
 import numpy as np
 import wandb
 
@@ -13,7 +13,8 @@ from pyjobshop.simheuristic.EliteSolutions import EliteSolutions, EliteSolution
 A dynamic SimHeuristic implementation will generate new solutions with different p-quantile settings
 and simulate them given a fixed simulation budget
 """
-use_wandb = True
+use_wandb = False
+data_list = []
 project_name = "simheuristics-sensitivity"
 problem_name = "HybridFlowShop"
 
@@ -35,7 +36,7 @@ for (j, k) in [(30, 30)]:
                 "max_time_per_cp_solve": 30,
                 "time_limit": beta,
                 "consider_mean": int(True),
-                "num_sims_long": 1000,
+                "num_sims_long": 5000,
                 "enumerate": 0
             }
 
@@ -143,3 +144,16 @@ for (j, k) in [(30, 30)]:
         if use_wandb:
             wandb.log({"final_best": simulator_best_sol.mean})
             wandb.finish()
+
+        data_list.append({
+                "num_jobs": j,
+                "num_stages": k,
+                "num_sims": eta,
+                "max_time_per_cp_solve": config["max_time_per_cp_solve"],
+                "time_limit": beta,
+                "consider_mean": int(True),
+                "num_sims_long": config["num_sims_long"],
+                "method": "adaptive"
+            })
+        data_df = pd.DataFrame(data_list)
+        data_df.to_csv("results/sensitivity_dynamic.csv")

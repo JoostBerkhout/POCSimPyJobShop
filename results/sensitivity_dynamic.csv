@@ -1,0 +1,2 @@
+,num_jobs,num_stages,num_sims,max_time_per_cp_solve,time_limit,consider_mean,num_sims_long,method
+0,30,30,100,30,60,1,10,adaptive
