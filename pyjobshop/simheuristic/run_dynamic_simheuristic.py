@@ -58,6 +58,7 @@ while time_spend < config["max_time_secs"]:
     # Randomly select data based on scores
     probs = np.array(list(scores.values())) / sum(scores.values())
     data_key = np.random.choice(list(scores.keys()), p=list(probs))
+    print(f'data key chosen {data_key}')
 
     # Update data if needed
     new_data = data_key != old_data_key
@@ -89,12 +90,16 @@ while time_spend < config["max_time_secs"]:
         time_limit=time_limit,
     )
 
+    print(result)
+
     # Update elite set
     callback.solutions.keep_top_n(config["max_size_elite_set"])
 
     # Update scores
     best_obj = callback.solutions.get_best_elite_solution().simulator.mean
+    print(f'Best obj {best_obj}')
     worst_obj = callback.solutions.get_worst_elite_solution().simulator.mean
+    print(f'Worst obj {worst_obj}')
     if best_obj < best_objective_elite:
         scores[data_key] += config["score_finding_new_best"]
         best_objective_elite = best_obj
@@ -102,7 +107,7 @@ while time_spend < config["max_time_secs"]:
     elif worst_obj < worst_objective_elite:
         scores[data_key] += config["score_finding_new_elite"]
         worst_objective_elite = worst_obj
-
+    print(f'New scores {scores}')
     time_spend = time.time() - start_time
 
 callback.solutions.print_summary()

@@ -19,6 +19,7 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         self.num_sims = num_sims
         self.solutions = EliteSolutions()
         self.solver: Solver | None = None
+        self.total_sims = 0
 
     def set_solver(self, solver: Solver):
         """
@@ -39,11 +40,14 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                 {
                     "Objective new candidate": self.objective_value,
                     "Current bound": self.best_objective_bound,
+                    "budget": self.total_sims
                 }
             )
         if self.solutions.is_new_schedule(schedule):
             simulator = Simulator(self.problem, solution)
             simulator.simulate(self.num_sims)
+            self.total_sims += self.num_sims
+            print(f'total sims {self.total_sims}')
             metadata = {
                 "current_time": self.WallTime(),
                 "current_bound": self.best_objective_bound,
@@ -61,5 +65,6 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                     {
                         "Mean objective new candidate": simulator.mean,
                         "Best mean objective": best_elite_sol.simulator.mean,
+                        "budget": self.total_sims
                     }
                 )

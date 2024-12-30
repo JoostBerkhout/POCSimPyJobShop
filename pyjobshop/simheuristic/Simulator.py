@@ -28,6 +28,7 @@ class Simulator:
         self.solution = solution
         self.data_generator = problem.build_data_generator()
         self.results: List[float] = []
+        self.total_sims = 0
 
     def simulate(self, num_sims: int):
         """

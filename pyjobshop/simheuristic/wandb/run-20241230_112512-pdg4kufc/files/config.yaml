@@ -1,0 +1,40 @@
+_wandb:
+    value:
+        cli_version: 0.19.1
+        m: []
+        python_version: 3.9.21
+        t:
+            "1":
+                - 55
+            "2":
+                - 55
+            "3":
+                - 2
+                - 13
+                - 16
+                - 23
+                - 55
+            "4": 3.9.21
+            "5": 0.19.1
+            "8":
+                - 5
+            "12": 0.19.1
+            "13": darwin-x86_64
+consider_mean:
+    value: 1
+init_score:
+    value: 1
+max_size_elite_set:
+    value: 5
+max_time_per_cp_solve:
+    value: 30
+max_time_secs:
+    value: 300
+num_init_sims:
+    value: 25
+num_sims_long:
+    value: 5000
+score_finding_new_best:
+    value: 2
+score_finding_new_elite:
+    value: 1

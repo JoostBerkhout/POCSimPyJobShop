@@ -1,0 +1,44 @@
+{
+  "os":  "macOS-10.16-x86_64-i386-64bit",
+  "python":  "CPython 3.9.21",
+  "startedAt":  "2024-12-28T09:25:15.948954Z",
+  "program":  "/Users/kimvandenhouten/Documents/PhD/Repositories/SimPyJobShop/pyjobshop/simheuristic/run_dynamic_simheuristic_kim.py",
+  "codePath":  "pyjobshop/simheuristic/run_dynamic_simheuristic_kim.py",
+  "git":  {
+    "remote":  "https://github.com/JoostBerkhout/SimPyJobShop.git",
+    "commit":  "a18f4012986e8a09cae83e5bc37ffc3ca535ec85"
+  },
+  "email":  "k.c.vandenhouten@tudelft.nl",
+  "root":  "/Users/kimvandenhouten/Documents/PhD/Repositories/SimPyJobShop/pyjobshop/simheuristic",
+  "host":  "kims-mbp.home",
+  "executable":  "/Users/kimvandenhouten/opt/anaconda3/envs/SimPyJobShopEnv/bin/python",
+  "codePathLocal":  "run_dynamic_simheuristic_kim.py",
+  "cpu_count":  8,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "494384795648",
+      "used":  "329146388480"
+    },
+    "/System/Volumes/Data":  {
+      "total":  "494384795648",
+      "used":  "329146388480"
+    }
+  },
+  "memory":  {
+    "total":  "17179869184"
+  },
+  "cpu":  {
+    "count":  8,
+    "countLogical":  8
+  },
+  "apple":  {
+    "name":  "Unknown",
+    "ecpuCores":  4,
+    "pcpuCores":  4,
+    "gpuCores":  8,
+    "memoryGb":  16,
+    "swapTotalBytes":  "9663676416",
+    "ramTotalBytes":  "17179869184"
+  }
+}
