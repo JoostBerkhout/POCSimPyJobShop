@@ -6,8 +6,7 @@ import wandb
 from pyjobshop.simheuristic.Simulator import Simulator
 from pyjobshop.simheuristic.modeling import find_solution_for_other_data
 from pyjobshop.simheuristic.problems.HybridFlowShopGeneric import HybridFlowShop
-from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
-from pyjobshop.simheuristic.EliteSolutions import EliteSolutions, EliteSolution
+from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
 
 """
 A dynamic SimHeuristic implementation will generate new solutions with different p-quantile settings
@@ -21,7 +20,7 @@ problem_name = "HybridFlowShop"
 quantiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 
-for (j, k) in [(30, 30)]:
+for (j, k) in [(30, 15)]:
     for beta in [60, 300, 600]:
         for eta in [25, 50, 100]:
             # the type checker prevents adding quantiles to config...

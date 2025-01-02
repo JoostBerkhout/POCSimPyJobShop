@@ -1,9 +1,7 @@
-import matplotlib.pyplot as plt
 import wandb
 import pandas as pd
 
 from pyjobshop.simheuristic.Simulator import Simulator
-from pyjobshop.plot import plot_machine_gantt
 from pyjobshop.simheuristic.problems.HybridFlowShopGeneric import HybridFlowShop
 from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
 from pyjobshop.simheuristic.utils import save_elite_solutions_to_csv
@@ -19,7 +17,7 @@ project_name = "simheuristics-sensitivity"
 method_name = "standard"
 problem_name = "HybridFlowShop"
 
-for (j, k) in [(30, 30)]:
+for (j, k) in [(10, 5)]:
     for beta in [60, 300, 600]:
         for eta in [25, 50, 100]:
             config: dict[str, int] = {
