@@ -67,6 +67,7 @@ def solve(
         )
 
         cpoptimizer = CPOptimizerSolver(data)
+
         return cpoptimizer.solve(
             time_limit,
             display,

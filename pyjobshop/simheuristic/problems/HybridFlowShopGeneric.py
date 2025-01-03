@@ -16,11 +16,12 @@ class HybridFlowShop(Problem):
     Specific implementation of a hybrid flow shop. Taken from the notebook
     hybrid_flow_shop.ipynb.
     """
-    def __init__(self, num_jobs, num_stages):
+    def __init__(self, num_jobs, num_stages, seed):
         self.num_jobs = num_jobs
         self.num_stages = num_stages
         num_machines = [2, 3, 2, 3, 3, 2, 3, 1, 2, 4, 1, 4, 2, 2, 1, 2, 3, 1, 2, 2, 2, 3, 2, 3, 2, 1, 3, 1, 2, 3, 1, 4, 4, 2, 2, 2, 3, 1, 2, 4]
         self.num_machines = num_machines[:num_jobs]
+        self.seed = seed
         super(HybridFlowShop, self).__init__()
 
     @staticmethod
@@ -96,7 +97,7 @@ class HybridFlowShop(Problem):
 
         loc = 1
         max_rand_mean = 15
-        seed = 2
+        seed = self.seed
         prob_random_duration = 0.3
 
         # Job durations
