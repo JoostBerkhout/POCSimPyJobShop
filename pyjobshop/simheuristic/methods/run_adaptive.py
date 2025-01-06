@@ -24,7 +24,7 @@ def run_adaptive(config):
     project_name = "simheuristics-sensitivity"
     problem_name = "HybridFlowShop"
 
-    quantiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    quantiles = config["quantiles"]
 
     if use_wandb:
         # Init wandb
@@ -141,6 +141,6 @@ def run_adaptive(config):
             "consider_mean": int(True),
             "num_sims_long": config["num_sims_long"],
             "method": "adaptive",
-             "seed": config["seed"]
+            "seed": config["seed"]
         })
     return data_list

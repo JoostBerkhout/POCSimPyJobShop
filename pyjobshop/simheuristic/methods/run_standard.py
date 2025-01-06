@@ -66,7 +66,7 @@ def run_standard(config):
         "num_jobs": config["num_jobs"],
         "num_stages": config["num_stages"],
         "num_sims_long": config["num_sims_long"],
-        "final_best": simulator_best_sol.mean,
+        "best_scop": simulator_best_sol.mean,
         "method": "standard",
         "seed": config["seed"]
                       })
