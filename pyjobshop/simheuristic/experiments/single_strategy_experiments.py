@@ -6,7 +6,7 @@ from pyjobshop.simheuristic.methods.run_standard import run_standard
 from pyjobshop.simheuristic.methods.configs import dcop_config, standard_config, adaptive_config
 
 summarized_data = []
-output_file = "results/mean_strategy.csv"
+output_file = "results/new_results_adaptive.csv"
 
 config = adaptive_config
 
@@ -14,13 +14,16 @@ config = adaptive_config
 for seed in [200, 120, 6, 53, 13]:
     print(f'\nStart with seed {seed}')
     for time_limit in [300, 600, 1800]:
-        for strategy in ["mean"]:
+        for strategy in ["adaptive", "mean"]:
             if strategy == "mean":
                 config["consider_mean"] = int(True)
-                config["quantiles"] = []
+                config["strategies"] = []
+            elif strategy == "adaptive":
+                config["consider_mean"] = int(True)
+                config["strategies"] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
             else:
                 config["consider_mean"] = int(False)
-                config["quantiles"] = [strategy]
+                config["strategies"] = [strategy]
 
             config["time_limit"] = time_limit
             config['seed'] = seed

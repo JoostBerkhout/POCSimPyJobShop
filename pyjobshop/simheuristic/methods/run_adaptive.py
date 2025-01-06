@@ -2,54 +2,54 @@ import time
 import pandas as pd
 import numpy as np
 import wandb
+import numpy.random as rnd
 
 from pyjobshop.simheuristic.Simulator import Simulator
 from pyjobshop.simheuristic.modeling import find_solution_for_other_data
 from pyjobshop.simheuristic.problems.HybridFlowShopGeneric import HybridFlowShop
 from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
+from pyjobshop.simheuristic.RouletteWheel import RouletteWheel
+from pyjobshop.simheuristic.Outcome import Outcome
 
 """
 An adaptive SimHeuristic implementation will generate new solutions with different p-quantile settings
 and simulate them given a fixed simulation budget
 """
 
-# TODO: do we still want to implement a RouletteWheel like implementation?
 
+def run_adaptive(config, use_wandb=False):
 
-def run_adaptive(config):
+    print(f'Start adaptive simheuristic at {time.time()}')
     # Set seed for reproduciblity
-    np.random.seed(config['seed'])
-    use_wandb = False
-    data_list = []
-    project_name = "simheuristics-sensitivity"
-    problem_name = "HybridFlowShop"
-
-    quantiles = config["quantiles"]
+    rnd_state = rnd.RandomState(config["seed"])
 
     if use_wandb:
         # Init wandb
         wandb.init(
-            project=project_name,  # where it will be logged
-            name="adaptive",  # name of the run
+            project=config["project_name"],  # where it will be logged
             config=config,  # log config
         )
 
     # Set problem
-    problem = HybridFlowShop(num_jobs=config["num_jobs"], num_stages=config["num_stages"], seed=config["seed"])
-    assert problem.__class__.__name__ == problem_name, "Set correct problem"
+    if config["problem_name"] == "HybridFlowShop":
+        problem = HybridFlowShop(num_jobs=config["num_jobs"], num_stages=config["num_stages"], seed=config["seed"])
+    else:
+        ValueError(f'Unknown problem: {config["problem_name"]}')
+
     data_generator = problem.build_data_generator()
 
     # Set concrete data to consider
+    strategies = config["strategies"]
     concrete_data = {}
     if config["consider_mean"]:
         concrete_data["mean"] = data_generator.int_mean()
-    for quantile in quantiles:
+    for quantile in strategies:
         concrete_data[f"quantile_{quantile}"] = data_generator.quantile(quantile)
-
-    # Set init scores
-    scores = {k: config["init_score"] for k in concrete_data.keys()}
+    strategies = [k for k in concrete_data.keys()]
 
     # Technical init
+    select = RouletteWheel(scores=[20, 5, 0.5], decay=0.8, num_strategies=len(strategies))
+    current_objective = np.inf
     best_objective_elite = np.inf
     worst_objective_elite = np.inf
     elite_set = EliteSolutions()
@@ -57,13 +57,15 @@ def run_adaptive(config):
     time_spend = time.time() - start_time
     current_solution = None
     old_data_key = None
-    data_keys = []
+    strategy_history = []
+    data_list = []
+
     while time_spend < config["time_limit"]:
-        # Randomly select data based on scores
-        probs = np.array(list(scores.values())) / sum(scores.values())
-        data_key = np.random.choice(list(scores.keys()), p=list(probs))
-        #print(f'data key chosen {data_key}')
-        data_keys.append(data_key)
+
+        # Select a strategy
+        s_idx = select(rnd_state)
+        data_key = strategies[s_idx]
+        strategy_history.append(data_key)
 
         # Update data if needed
         new_data = data_key != old_data_key
@@ -73,7 +75,7 @@ def run_adaptive(config):
 
             if current_solution is not None:
                 # Update current solution for new data
-                current_solution = find_solution_for_other_data(
+                current_solution, current_objective = find_solution_for_other_data(
                     current_solution, problem, data
                 )
 
@@ -100,25 +102,33 @@ def run_adaptive(config):
         candidate_simulator = Simulator(problem, candidate_solution)
         candidate_simulator.simulate(config["num_sims"])
 
-        #print(f'The mean of the candidate solution is {candidate_simulator.mean}')
+        if current_solution is None:
+            current_solution = candidate_solution
+            current_objective = result.objective
+            # Update elite set
+            elite_set.add(candidate_solution, candidate_simulator, candidate_objective)
+        elif candidate_objective < current_objective:
+            current_solution = candidate_solution
+            current_objective = candidate_objective
 
-        # Update elite set
-        elite_set.add(candidate_solution, candidate_simulator, candidate_objective)
+            # Update elite set
+            elite_set.add(candidate_solution, candidate_simulator, candidate_objective)
+            outcome = Outcome.BETTER
+        else:
+            outcome = Outcome.REJECT
 
         # Update scores
         best_obj = elite_set.get_best_elite_solution().simulator.mean
-        #print(f'Best obj {best_obj}')
         worst_obj = elite_set.get_worst_elite_solution().simulator.mean
-        #print(f'Worst obj {worst_obj}')
 
         if best_obj < best_objective_elite:
-            scores[data_key] += config["score_finding_new_best"]
             best_objective_elite = best_obj
             worst_objective_elite = worst_obj  # by definition new worst
+            outcome = Outcome.BEST
         elif worst_obj < worst_objective_elite:
-            scores[data_key] += config["score_finding_new_elite"]
             worst_objective_elite = worst_obj
-        #print(f'New scores {scores}')
+
+        select.update(s_idx, outcome)
         time_spend = time.time() - start_time
 
     best_stoch_solution = elite_set.get_best_elite_solution().solution
@@ -126,7 +136,7 @@ def run_adaptive(config):
     simulator_best_sol.simulate(config["num_sims_long"])
 
     print(f'Mean value after long simulation {simulator_best_sol.mean}')
-    print(f'Used data keys {data_keys}')
+    print(f'Used strategies {strategy_history}')
     # TODO: now we need to select the best solution from the elite set and then we take the best one at the end
     if use_wandb:
         wandb.log({"final_best": simulator_best_sol.mean})
@@ -141,6 +151,7 @@ def run_adaptive(config):
             "consider_mean": int(True),
             "num_sims_long": config["num_sims_long"],
             "method": "adaptive",
-            "seed": config["seed"]
+            "seed": config["seed"],
+            "best_scop": simulator_best_sol.mean
         })
     return data_list

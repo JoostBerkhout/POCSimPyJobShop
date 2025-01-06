@@ -68,12 +68,13 @@ def find_solution_for_other_data(
     model = fix_solution(solution, model)
     results = model.solve(display=False)
     new_solution = results.best
+    new_objective = results.objective
 
     # Reset mode choices to original mode indices
     for task in new_solution.tasks:
         task.mode = model._map_to_old_mode[task.mode]
 
-    return new_solution
+    return new_solution, new_objective
 
 
 def model_builder_fix_sol(

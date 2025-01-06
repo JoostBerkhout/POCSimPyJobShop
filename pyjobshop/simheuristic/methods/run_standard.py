@@ -1,5 +1,6 @@
 import wandb
 import numpy as np
+import time
 
 from pyjobshop.simheuristic.Simulator import Simulator
 from pyjobshop.simheuristic.problems.HybridFlowShopGeneric import HybridFlowShop
@@ -11,25 +12,25 @@ This is a static / standard SimHeuristic implementation
 """
 
 
-def run_standard(config):
-    np.random.seed(config["seed"])
-    use_wandb = False
-    save_to_csv = False
-    data_list = []
-    project_name = "simheuristics-sensitivity"
-    method_name = "standard"
-    problem_name = "HybridFlowShop"
+def run_standard(config, use_wandb=False):
 
+    print(f'Start standard simheuristic at time {time.time()}')
     if use_wandb:
         wandb.init(
-            project=project_name,  # where it will be logged
-            name=method_name,  # name of the run
+            project=config["project_name"],  # where it will be logged
             config=config,  # log config
         )
+    # Technical init
+    save_to_csv = False
+    data_list = []
+    np.random.seed(config["seed"])
 
-    # Create a model
-    problem = HybridFlowShop(num_jobs=config["num_jobs"], num_stages=config["num_stages"], seed=config["seed"])
-    assert problem.__class__.__name__ == problem_name, "Set correct problem"
+    # Set problem
+    if config["problem_name"] == "HybridFlowShop":
+        problem = HybridFlowShop(num_jobs=config["num_jobs"], num_stages=config["num_stages"], seed=config["seed"])
+    else:
+        ValueError(f'Unknown problem: {config["problem_name"]}')
+
     data_generator = problem.build_data_generator()
     data = data_generator.int_mean()
     model = problem.concrete_model(data)
@@ -44,7 +45,7 @@ def run_standard(config):
     )
     print("Solver status:", result.status)
     print("Best objective value:", result.objective)
-    callback.solutions.print_summary()
+    #callback.solutions.print_summary()
     if save_to_csv:
         save_elite_solutions_to_csv(callback.solutions, problem_name)
 

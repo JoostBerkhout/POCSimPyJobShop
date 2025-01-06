@@ -1,0 +1,4 @@
+,num_jobs,num_stages,num_sims,max_time_per_cp_solve,time_limit,consider_mean,num_sims_long,method,seed,best_scop
+0,20,20,25.0,30.0,120,1.0,100,adaptive,20,355.02
+1,20,20,,,120,,100,dcop,20,4461.37
+2,20,20,25.0,,120,,100,standard,20,1112.15

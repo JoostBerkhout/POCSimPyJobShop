@@ -3,7 +3,9 @@ dcop_config: dict[str, int] = {
         "num_stages": 20,
         "num_sims": 25,
         "num_sims_long": 5000,
-        "method": "dcop"
+        "method": "dcop",
+        "project_name": "adaptive_simheuristics",
+        "problem_name": "HybridFlowShop"
     }
 
 adaptive_config: dict = {
@@ -19,7 +21,9 @@ adaptive_config: dict = {
     "enumerate": 0,
     "method": "adaptive",
     "consider_mean": int(True),
-    "quantiles": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+    "strategies": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+    "project_name": "adaptive_simheuristics",
+    "problem_name": "HybridFlowShop"
 }
 
 standard_config: dict = {
@@ -28,5 +32,7 @@ standard_config: dict = {
                 "num_sims": 25,
                 "num_sims_long": 5000,
                 "enumerate": 0,
-                "method": "standard"
+                "method": "standard",
+                "project_name": "adaptive_simheuristics",
+                "problem_name": "HybridFlowShop"
             }

@@ -47,7 +47,6 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
             simulator = Simulator(self.problem, solution)
             simulator.simulate(self.num_sims)
             self.total_sims += self.num_sims
-            print(f'total sims {self.total_sims}')
             metadata = {
                 "current_time": self.WallTime(),
                 "current_bound": self.best_objective_bound,
