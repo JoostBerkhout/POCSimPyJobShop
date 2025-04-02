@@ -99,23 +99,37 @@ def run_adaptive(config, use_wandb=False):
 
         candidate_solution = result.best
         candidate_objective = result.objective
-        candidate_simulator = Simulator(problem, candidate_solution)
-        candidate_simulator.simulate(config["num_sims"])
+        print(f'Objective of candidate is {result.objective}')
+        print(f'Status of candidate is {result.status}')
+        print(f'Current sol')
 
+        solution_printable = [(task.start, task.end) for task in candidate_solution.tasks]
+        print(solution_printable[0])
         if current_solution is None:
             current_solution = candidate_solution
-            current_objective = result.objective
+            current_objective = candidate_objective
+            current_simulator = Simulator(problem, candidate_solution)
+            current_simulator.simulate(config["num_sims"])
             # Update elite set
-            elite_set.add(candidate_solution, candidate_simulator, candidate_objective)
+            elite_set.add(current_solution, current_simulator, current_objective)
+
         elif candidate_objective < current_objective:
             current_solution = candidate_solution
             current_objective = candidate_objective
 
+            print(f'New best DCOP, so we start simulate')
+
+            # New best DCOP so we start simulating
+            current_simulator = Simulator(problem, candidate_solution)
+            current_simulator.simulate(config["num_sims"])
+
+            print(f'SCOP value of candidate is {current_simulator.mean}')
             # Update elite set
-            elite_set.add(candidate_solution, candidate_simulator, candidate_objective)
+            elite_set.add(current_solution, current_simulator, current_objective)
             outcome = Outcome.BETTER
         else:
             outcome = Outcome.REJECT
+            current_solution = candidate_solution
 
         # Update scores
         best_obj = elite_set.get_best_elite_solution().simulator.mean
@@ -123,6 +137,7 @@ def run_adaptive(config, use_wandb=False):
 
         if best_obj < best_objective_elite:
             best_objective_elite = best_obj
+            print(f'New best global SCOP {best_objective_elite}')
             worst_objective_elite = worst_obj  # by definition new worst
             outcome = Outcome.BEST
         elif worst_obj < worst_objective_elite:

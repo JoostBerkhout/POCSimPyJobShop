@@ -13,8 +13,9 @@ config = adaptive_config
 # Run al methods with different time limits
 for seed in [200, 120, 6, 53, 13]:
     print(f'\nStart with seed {seed}')
-    for time_limit in [300, 600, 1800]:
-        for strategy in ["adaptive", "mean"]:
+    for time_limit in [600]:
+        for strategy in ["mean"]:
+            config["num_sims_long"] = 100
             if strategy == "mean":
                 config["consider_mean"] = int(True)
                 config["strategies"] = []
@@ -33,4 +34,4 @@ for seed in [200, 120, 6, 53, 13]:
             print(f'data')
             summarized_data = summarized_data + data
             summarized_data_df = pd.DataFrame(summarized_data)
-            summarized_data_df.to_csv(output_file)
+            #summarized_data_df.to_csv(output_file)
