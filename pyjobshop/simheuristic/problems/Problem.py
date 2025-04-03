@@ -13,12 +13,14 @@ class Problem:
     ----------
     distributions : Dict[str, DiscreteRV]
         Stores distributions for the parameters being configured.
+    seed: int
+        The seed for generating distribution data.
     constants : Dict[str, Any]
         Stores constants (without uncertainty).
     """
 
-    def __init__(self) -> None:
-        self.distributions, self.constants = self.distribution_data()
+    def __init__(self, seed: int = 0) -> None:
+        self.distributions, self.constants = self.distribution_data(seed)
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -29,7 +31,7 @@ class Problem:
         raise NotImplementedError("Subclasses must implement this method.")
 
     def distribution_data(
-        self,
+        self, seed: int = 0
     ) -> Tuple[Dict[str, DiscreteRV], Dict[str, int]]:
         """
         Abstract placeholder for generating and returning distribution data.

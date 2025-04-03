@@ -23,7 +23,7 @@ if use_wandb:
     )
 
 # Create a model
-problem = HybridFlowShop()
+problem = HybridFlowShop(seed=3)
 assert problem.__class__.__name__ == problem_name, "Set correct problem"
 data_generator = problem.build_data_generator()
 data = data_generator.int_mean()

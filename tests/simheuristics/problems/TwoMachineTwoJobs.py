@@ -48,7 +48,7 @@ class TwoMachinesTwoJobs(Problem):
         return model
 
     def distribution_data(
-        self,
+        self, seed: int = 0
     ) -> Tuple[Dict[str, DiscreteRV], Dict[str, int]]:
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}

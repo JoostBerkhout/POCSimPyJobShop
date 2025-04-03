@@ -83,17 +83,16 @@ class HybridFlowShop(Problem):
         return model
 
     def distribution_data(
-        self,
+        self, seed: int = 0
     ) -> Tuple[Dict[str, DiscreteRV], Dict[str, int]]:
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 8
+        num_jobs = 4
         num_stages = 3
         num_machines = [2, 3, 2]
         loc = 1
         max_rand_mean = 15
-        seed = 2
         prob_random_duration = 0.3
 
         # Job durations
