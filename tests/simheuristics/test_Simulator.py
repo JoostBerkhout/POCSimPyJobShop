@@ -1,3 +1,5 @@
+import time
+
 from pyjobshop.simheuristic.Simulator import Simulator
 from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
 from tests.simheuristics.problems.OneMachineTenJobs import OneMachineTenJobs
@@ -28,6 +30,7 @@ def test_simulator():
         new_simulator.simulate(num_sims)
 
         # Test whether simulation results coincide
+        assert num_sims == simulator.num_sims
         assert new_simulator.num_sims == simulator.num_sims
         assert new_simulator.mean == simulator.mean
         assert new_simulator.variance == simulator.variance
@@ -43,3 +46,17 @@ def test_simulator():
         assert new_simulator.num_sims == simulator.num_sims
         assert new_simulator.mean == simulator.mean
         assert new_simulator.variance == simulator.variance
+
+        # Test simulation with a time_limit
+        current_num_sims = simulator.num_sims
+        time_limit = 0.0
+        simulator.simulate(num_sims, time_limit)
+        assert simulator.num_sims == current_num_sims
+
+        # Time how long a simulation takes
+        start_time = time.time()
+        simulator.simulate(10)
+        mean_sim_time = (time.time() - start_time) / 10
+        current_num_sims = simulator.num_sims
+        simulator.simulate(100000000, mean_sim_time * 0.9)  # simulate 1
+        assert simulator.num_sims == current_num_sims + 1

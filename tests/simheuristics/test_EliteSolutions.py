@@ -17,6 +17,7 @@ def mock_solution():
 def mock_simulator():
     """Fixture for creating a mock Simulator object."""
     simulator = Mock(spec=Simulator)
+    simulator.num_sims = 3.0
     simulator.mean = 50.0
     simulator.variance = 10.0
     return simulator
@@ -130,3 +131,61 @@ def test_print_summary(capsys, elite_solutions, mock_solution, mock_simulator):
     assert "'key': 'value'" in captured.out
     assert "Mean: 50.00" in captured.out
     assert "Var: 10.00" in captured.out
+
+
+def test_simulate_to_num_sims(elite_solutions, mock_solution, mock_simulator):
+    """Test the simulate_to_num_sims method."""
+
+    # Set up the elite solutions with a mock simulator
+    schedule = {0: [1, 2], 1: [3]}
+    elite_solutions.add(mock_solution, mock_simulator, 25.0, schedule)
+
+    # Run the simulation with no time limit
+    num_sims = 5
+    elite_solutions.simulate_to_num_sims(num_sims)
+
+    # Verify the simulator's simulate method is called with correct arguments
+    assert mock_simulator.simulate.call_count == 1
+    extra_sims = num_sims - mock_simulator.num_sims
+    assert mock_simulator.simulate.call_args[0][0] == extra_sims
+    assert mock_simulator.simulate.call_args[0][1] is None  # No time limit
+
+    # Test that simulation stops if time limit is reached
+    time_limit = 0.0  # no time for simulation
+    elite_solutions.simulate_to_num_sims(num_sims, time_limit)
+    assert mock_simulator.simulate.call_count == 1
+
+    # Test that nothing is simulated for small num_sims
+    num_sims = 1
+    elite_solutions.simulate_to_num_sims(num_sims)
+    assert mock_simulator.simulate.call_count == 1
+
+    # Let's add another solution
+    elite_solutions.add(mock_solution, mock_simulator, 25.0, schedule)
+    second_solution = Mock(spec=Solution)
+    second_simulator = Mock(spec=Simulator)
+    second_simulator.num_sims = 10.0
+    second_simulator.mean = 40.0
+    second_simulator.variance = 5.0
+    schedule2 = {0: [4, 5], 1: [6]}
+    elite_solutions.add(
+        second_solution, second_simulator, objective=30.0, schedule=schedule2
+    )
+
+    # Simulate till 10 so that only the first solution is simulated
+    num_sims = 10
+    elite_solutions.simulate_to_num_sims(num_sims)
+    assert mock_simulator.simulate.call_count == 2
+    assert second_simulator.simulate.call_count == 0
+
+    # Simulate till 15 so that both are simulated
+    num_sims = 15
+    elite_solutions.simulate_to_num_sims(num_sims)
+    assert mock_simulator.simulate.call_count == 3
+    assert second_simulator.simulate.call_count == 1
+
+    # Simulate till 2 so that both are not simulated
+    num_sims = 2
+    elite_solutions.simulate_to_num_sims(num_sims)
+    assert mock_simulator.simulate.call_count == 3
+    assert second_simulator.simulate.call_count == 1
