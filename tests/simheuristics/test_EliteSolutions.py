@@ -1,4 +1,5 @@
-from unittest.mock import Mock
+import time
+from unittest.mock import ANY, Mock
 
 import pytest
 
@@ -189,3 +190,55 @@ def test_simulate_to_num_sims(elite_solutions, mock_solution, mock_simulator):
     elite_solutions.simulate_to_num_sims(num_sims)
     assert mock_simulator.simulate.call_count == 3
     assert second_simulator.simulate.call_count == 1
+
+
+def test_sim_to_time_limit(elite_solutions):
+    """Test the simulate_to_time_limit method."""
+
+    # Create two solutions with different initial simulation counts
+    solution1 = Mock(spec=Solution)
+    simulator1 = Mock(spec=Simulator)
+    simulator1.num_sims = 10
+    simulator1.mean = 45.0
+    simulator1.variance = 5.0
+
+    solution2 = Mock(spec=Solution)
+    simulator2 = Mock(spec=Simulator)
+    simulator2.num_sims = 7
+    simulator2.mean = 40.0
+    simulator2.variance = 4.0
+
+    # Use simulate mock that sleeps to simulate time passing
+    def simulate_mock(num, time_limit=None):
+        time.sleep(num * 0.05)
+        return None
+
+    simulator1.simulate.side_effect = simulate_mock
+    simulator2.simulate.side_effect = simulate_mock
+
+    elite_solutions.add(solution1, simulator1, 25.0, {0: [1, 2]})
+    elite_solutions.add(solution2, simulator2, 30.0, {0: [3, 4]})
+
+    # Test 1: Only time to simulate the second solution 3 times
+    start_time = time.time()
+    elite_solutions.simulate_to_time_limit(0.15)
+    duration = time.time() - start_time
+
+    assert simulator1.simulate.call_count == 0
+    simulator2.simulate.assert_called_once_with(3, ANY)
+
+    # Test 2: Check time limit
+    assert 0.15 <= duration <= 0.2
+
+    # Test 3: Check whether both solutions get simulated
+    simulator2.num_sims = 10
+    start_time = time.time()
+    elite_solutions.simulate_to_time_limit(0.1)
+    duration = time.time() - start_time
+
+    simulator1.simulate.assert_called_once_with(1, ANY)
+    second_call_args = simulator2.simulate.call_args_list[1][0]
+    assert second_call_args == (1, ANY)
+
+    # Test 4: Check time limit
+    assert 0.1 <= duration <= 0.15

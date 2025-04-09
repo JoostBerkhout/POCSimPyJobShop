@@ -227,3 +227,34 @@ class EliteSolutions:
                     remaining_time = max(time_limit - time_spent, 0.0)
 
                 elite_solution.simulator.simulate(extra_sims, remaining_time)
+
+    def simulate_to_time_limit(self, time_limit: float):
+        """
+        Simulates elite solutions until the given time limit is reached.
+
+        Parameters
+        ----------
+        time_limit : float
+            Max time allowed for simulation (in seconds).
+
+        Notes
+        -----
+        - Adds one simulation at a time in round-robin fashion.
+        - Remaining time is passed to each simulator.
+        """
+
+        start_time = time.time()
+
+        # 1) ensure that all elite solutions have same number of simulations
+        max_num_sims = max(
+            sol.simulator.num_sims for sol in self.elite_solutions.values()
+        )
+        self.simulate_to_num_sims(max_num_sims, time_limit)
+
+        # 2) simulate each elite solution 1-by-1 until time limit is reached
+        time_spent = time.time() - start_time
+        while time_spent < time_limit:
+            max_num_sims += 1
+            remaining_time = max(time_limit - time_spent, 0.0)
+            self.simulate_to_num_sims(max_num_sims, remaining_time)
+            time_spent = time.time() - start_time
