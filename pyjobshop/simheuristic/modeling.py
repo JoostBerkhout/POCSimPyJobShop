@@ -65,6 +65,20 @@ def find_solution_for_other_data(
     """
 
     model = problem.concrete_model(data)
+    new_solution = find_solution_for_other_concrete_model(solution, model)
+
+    return new_solution
+
+
+def find_solution_for_other_concrete_model(
+    solution: Solution, model: Model
+) -> Solution:
+    """
+    Transforms the given solution to a solution fit for concrete model "model".
+    In particular, the new start and end times of all the tasks are adjusted to
+    the new model.
+    """
+
     model = fix_solution(solution, model)
     results = model.solve(display=False)
     new_solution = results.best

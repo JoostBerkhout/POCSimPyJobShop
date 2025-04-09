@@ -1,6 +1,8 @@
 import csv
 from typing import Dict
 
+import wandb
+
 from pyjobshop import Solution
 
 
@@ -66,3 +68,36 @@ def save_elite_solutions_to_csv(elite_solutions, filename: str):
             )
 
     print(f"Data saved to {csv_file_path}")
+
+
+def init_wandb(
+    problem_name: str, config: dict, wandb_config: dict[str, str] | None = None
+) -> None:
+    """
+    Initializes a Weights & Biases run with a structured naming scheme.
+
+    Parameters
+    ----------
+    problem_name : str
+        The name of the problem class.
+    config : dict
+        Configuration to be logged (usually simheuristic config).
+    wandb_config : dict[str, str], optional
+        Configuration for Weights & Biases logging, by default None.
+    """
+
+    if wandb_config is None:
+        wandb_config = {}
+
+    project_name = wandb_config.get("project_name")
+    run_name = wandb_config.get("run_name")
+    job_name = wandb_config.get("job_name")
+
+    wandb.init(
+        project=project_name,
+        name=run_name,
+        config=config,
+        group=problem_name,
+        reinit=True,
+        job_type=job_name,
+    )
