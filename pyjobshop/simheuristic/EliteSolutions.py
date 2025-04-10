@@ -105,6 +105,8 @@ class EliteSolutions:
         Keeps only the top n solutions with the lowest mean objective if all
         are simulated, else it will keep the best deterministic ones.
 
+        For simplicity, it is assumed all elites are simulated or none.
+
         Parameters
         ----------
         n : int
@@ -119,20 +121,25 @@ class EliteSolutions:
                 self.elite_solutions.values(),
                 key=lambda elite_solution: elite_solution.simulator.mean,
             )
-        else:
+        elif self.none_simulated():
             # Sort solutions by objective value
             sorted_solutions = sorted(
                 self.elite_solutions.values(),
                 key=lambda elite_solution: elite_solution.objective,
             )
+        else:
+            raise Exception(
+                "keep_top_n() assumes all elites are simulated or "
+                "none. This is to keep it simple."
+            )
 
-        # Retain only the top n solutions
+        # Keep only the top n solutions
         self.elite_solutions = {
             id(elite_solution.solution): elite_solution
             for elite_solution in sorted_solutions[:n]
         }
 
-    def get_best_elite_solution(self) -> EliteSolution:
+    def get_best_mean_solution(self) -> EliteSolution:
         """
         Returns the best-performing solution based on mean objective value.
 
@@ -143,13 +150,14 @@ class EliteSolutions:
         EliteSolution
             The best-performing elite solution.
         """
+        assert self.all_simulated(), "all should be simulated (KISS principle)"
         best_elite_solution = min(
             self.elite_solutions.values(),
             key=lambda elite_solution: elite_solution.simulator.mean,
         )
         return best_elite_solution
 
-    def get_worst_elite_solution(self) -> EliteSolution:
+    def get_worst_mean_solution(self) -> EliteSolution:
         """
         Returns the worst-performing solution based on mean objective value.
 
@@ -160,6 +168,7 @@ class EliteSolutions:
         EliteSolution
             The worst-performing elite solution.
         """
+        assert self.all_simulated(), "all should be simulated (KISS principle)"
         worst_elite_solution = max(
             self.elite_solutions.values(),
             key=lambda elite_solution: elite_solution.simulator.mean,
@@ -173,7 +182,7 @@ class EliteSolutions:
             print(
                 f"Solution id: {id(elite_solution.solution)} | "
                 f"Objective: {elite_solution.objective:.2f} | "
-                f"Num sims: {elite_solution.simulator.num_sims:.2f} | "
+                f"Num sims: {elite_solution.simulator.num_sims} | "
                 f"Mean: {elite_solution.simulator.mean:.2f} | "
                 f"Var: {elite_solution.simulator.variance:.2f} | "
                 f"Metadata: {elite_solution.metadata}"
@@ -183,6 +192,13 @@ class EliteSolutions:
         """Returns True if all elite solutions are simulated, False else."""
         for elite_solution in self.elite_solutions.values():
             if elite_solution.simulator.num_sims == 0:
+                return False
+        return True
+
+    def none_simulated(self) -> bool:
+        """Returns True if none elite solutions are simulated, False else."""
+        for elite_solution in self.elite_solutions.values():
+            if elite_solution.simulator.num_sims > 0:
                 return False
         return True
 
@@ -206,10 +222,8 @@ class EliteSolutions:
 
         Notes
         -----
-        - Only solutions with fewer than `num_sims` current simulations will be
-          updated.
-        - The remaining time is passed to each simulator; it's assumed that the
-          simulator can respect this time constraint internally.
+        - Only solutions with < `num_sims` simulations will be simulated.
+        - The remaining time is passed to each simulator.
         """
         start_time = time.time()
         remaining_time = None
@@ -244,17 +258,13 @@ class EliteSolutions:
         """
 
         start_time = time.time()
-
-        # 1) ensure that all elite solutions have same number of simulations
         max_num_sims = max(
             sol.simulator.num_sims for sol in self.elite_solutions.values()
         )
-        self.simulate_to_num_sims(max_num_sims, time_limit)
-
-        # 2) simulate each elite solution 1-by-1 until time limit is reached
         time_spent = time.time() - start_time
+
         while time_spent < time_limit:
-            max_num_sims += 1
             remaining_time = max(time_limit - time_spent, 0.0)
             self.simulate_to_num_sims(max_num_sims, remaining_time)
+            max_num_sims += 1
             time_spent = time.time() - start_time

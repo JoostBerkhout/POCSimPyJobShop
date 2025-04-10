@@ -4,7 +4,7 @@ from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
 from tests.simheuristics.problems.OneMachineTenJobs import OneMachineTenJobs
 
 
-def test_SolutionCallback():
+def test_solution_callback():
     """
     Tests SolutionCallback.
     """
@@ -15,8 +15,8 @@ def test_SolutionCallback():
     data = data_generator.quantile(0.7)
     model = problem.concrete_model(data)
 
-    # Solve the problem with a callback for solution generation
-    num_sims = 10000000
+    # Solve the problem
+    num_sims = 3
     time_limit = 0.1
     callback = SolutionCallback(
         problem,
@@ -33,8 +33,8 @@ def test_SolutionCallback():
 
     # Tests whether SolutionCallback stops in time and all simulated
     assert 0 < time.time() - start_time < time_limit + 0.1
-    assert len(callback.solutions.elite_solutions) == 1
     assert callback.solutions.all_simulated()
+    assert not callback.solutions.none_simulated()
 
     # Solve the problem again with a different callback
     time_limit = 0.1
@@ -54,7 +54,6 @@ def test_SolutionCallback():
 
     # Tests whether SolutionCallback stops in time, non are simulated and size
     assert time.time() - start_time < time_limit + 0.1
-    elite_sols = callback.solutions.elite_solutions.values()
-    num_sol_simulated = sum([sol.simulator.num_sims > 0 for sol in elite_sols])
-    assert num_sol_simulated == 0
+    assert callback.solutions.none_simulated()
+    assert not callback.solutions.all_simulated()
     assert len(callback.solutions.elite_solutions) == 3

@@ -123,8 +123,8 @@ def dynamic_simheuristic(
 
         # Update scores
         solutions = callback.solutions
-        best_obj = solutions.get_best_elite_solution().simulator.mean
-        worst_obj = solutions.get_worst_elite_solution().simulator.mean
+        best_obj = solutions.get_best_mean_solution().simulator.mean
+        worst_obj = solutions.get_worst_mean_solution().simulator.mean
         if best_obj < best_objective_elite:
             scores[model_key] += simh_config["score_finding_new_best"]
             best_objective_elite = best_obj

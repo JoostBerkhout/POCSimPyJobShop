@@ -85,7 +85,7 @@ def test_get_best_solution(elite_solutions, mock_solution, mock_simulator):
     # Add the best solution
     elite_solutions.add(best_solution, best_simulator, 5.0, {0: [0, 1]})
 
-    assert elite_solutions.get_best_elite_solution().solution == best_solution
+    assert elite_solutions.get_best_mean_solution().solution == best_solution
 
 
 def test_get_worst_solution(elite_solutions, mock_solution, mock_simulator):
@@ -96,7 +96,7 @@ def test_get_worst_solution(elite_solutions, mock_solution, mock_simulator):
         simulator.mean = 11.0 + i  # Higher mean is worse
         elite_solutions.add(solution, simulator, 10.0, {0: [0, 1]})
 
-    worst_solution = elite_solutions.get_worst_elite_solution().solution
+    worst_solution = elite_solutions.get_worst_mean_solution().solution
 
     assert worst_solution == solution
 

@@ -50,9 +50,15 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
             self.start_time_exp = time.time()
         else:
             self.start_time_exp = start_time_exp
-        self.start_time_sims = start_time_sims
+        if start_time_sims is None:
+            self.start_time_sims = self.start_time_exp
+        else:
+            self.start_time_sims = start_time_sims
         self.max_size_elite_set = max_size_elite_set
-        self.stop_time = stop_time
+        if stop_time is None:
+            self.stop_time = float("inf")
+        else:
+            self.stop_time = stop_time
         self.solutions = EliteSolutions()
         self.solver: Solver | None = None
 
@@ -68,17 +74,12 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
     @property
     def simulation_started(self) -> bool:
         """Returns True if enough time has passed to begin simulations."""
-        if self.start_time_sims is None:
-            return True
         return time.time() >= self.start_time_sims
 
     @property
     def remaining_time(self) -> float | None:
         """Returns remaining time till stop_time, or None if not set."""
-        if self.stop_time is None:
-            return None
-        else:
-            return max(self.stop_time - time.time(), 0.0)
+        return max(self.stop_time - time.time(), 0.0)
 
     def on_solution_callback(self):
         """Method that is called by ortools when a new solution is found."""
@@ -86,11 +87,13 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         try:
             solution = self.solver._convert_to_solution(self)
             schedule = find_schedule_per_resource(solution)
+            time_left = self.remaining_time > 0
+            new_schedule = self.solutions.is_new_schedule(schedule)
 
-            if self.solutions.is_new_schedule(schedule):
+            if time_left and new_schedule:
                 simulator = Simulator(self.problem, solution)
                 if self.simulation_started:
-                    simulator.simulate(self.num_sims, self.remaining_time)
+                    simulator.simulate(self.num_sims)
 
                 self.solutions.add(
                     solution=solution,
@@ -128,23 +131,13 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         }
 
         if self.simulation_started:
-            self.solutions.simulate_to_num_sims(
-                self.num_sims,
-                self.remaining_time,
+            self.solutions.simulate_to_num_sims(self.num_sims)
+            best_elite = self.solutions.get_best_mean_solution()
+            log_data.update(
+                {
+                    "Mean objective new candidate": simulator.mean,
+                    "Best mean objective": best_elite.simulator.mean,
+                }
             )
-            if self.solutions.all_simulated():
-                best_elite = self.solutions.get_best_elite_solution()
-                log_data.update(
-                    {
-                        "Mean objective new candidate": simulator.mean,
-                        "Best mean objective": best_elite.simulator.mean,
-                    }
-                )
-            elif simulator.num_sims > 0:
-                log_data.update(
-                    {
-                        "Mean objective new candidate": simulator.mean,
-                    }
-                )
 
         wandb.log(log_data)

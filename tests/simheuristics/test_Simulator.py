@@ -21,7 +21,7 @@ def test_simulator():
     callback = SolutionCallback(problem, num_sims=num_sims)
     model.solve(callback=callback, display=False)
 
-    elite_solution = callback.solutions.get_best_elite_solution()
+    elite_solution = callback.solutions.get_best_mean_solution()
 
     solution = elite_solution.solution
     simulator = elite_solution.simulator
