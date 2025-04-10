@@ -89,7 +89,7 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
 
             if self.solutions.is_new_schedule(schedule):
                 simulator = Simulator(self.problem, solution)
-                if self.start_time_sims is None or self.simulation_started:
+                if self.simulation_started:
                     simulator.simulate(self.num_sims, self.remaining_time)
 
                 self.solutions.add(
