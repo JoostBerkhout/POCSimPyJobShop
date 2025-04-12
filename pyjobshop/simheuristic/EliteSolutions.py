@@ -175,6 +175,21 @@ class EliteSolutions:
         )
         return worst_elite_solution
 
+    def get_best_deterministic_solution(self) -> EliteSolution:
+        """
+        Returns the best-performing solution based on objective value.
+
+        Returns
+        -------
+        EliteSolution
+            The best-performing elite solution.
+        """
+        best_elite_solution = min(
+            self.elite_solutions.values(),
+            key=lambda elite_solution: elite_solution.objective,
+        )
+        return best_elite_solution
+
     def print_summary(self):
         """Prints a summary of the elite solutions."""
         print("\nElite Solutions:")

@@ -62,6 +62,12 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         self.solutions = EliteSolutions()
         self.solver: Solver | None = None
 
+        self.callback_log: list[str] = []
+
+    def _log_event(self, message: str):
+        timestamp = time.time() - self.start_time_exp
+        self.callback_log.append(f"[{timestamp:.2f}s] {message}")
+
     def set_solver(self, solver: Solver):
         """Can be used to set the solver that is using this callback."""
         self.solver = solver
@@ -85,15 +91,24 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         """Method that is called by ortools when a new solution is found."""
 
         try:
+            self._log_event("Solution callback triggered.")
             solution = self.solver._convert_to_solution(self)
             schedule = find_schedule_per_resource(solution)
             time_left = self.remaining_time > 0
             new_schedule = self.solutions.is_new_schedule(schedule)
 
             if time_left and new_schedule:
+                self._log_event("New unique schedule and time left.")
                 simulator = Simulator(self.problem, solution)
+                self._log_event("Simulator loaded.")
                 if self.simulation_started:
+                    self._log_event("Simulation started.")
                     simulator.simulate(self.num_sims)
+                else:
+                    self._log_event(
+                        f"Simulation skipped, not yet allowed. Start time "
+                        f"sims. = {self.start_time_sims - self.start_time_exp}"
+                    )
 
                 self.solutions.add(
                     solution=solution,
@@ -110,10 +125,16 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
 
                 if self.max_size_elite_set is not None:
                     self.solutions.keep_top_n(self.max_size_elite_set)
+                    self._log_event("Elite set trimmed.")
+
+            elif not new_schedule:
+                self._log_event("Duplicate schedule. Ignored.")
+            elif not time_left:
+                self._log_event("Time limit reached. Solution ignored.")
 
         except Exception as e:
             print(
-                f"An error occured in on_solution_callback(). We catch it"
+                f"An error occurred in on_solution_callback(). We catch it"
                 f" because else it will continue indefinitely. Msg: {e}"
             )
             return
@@ -131,7 +152,12 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         }
 
         if self.simulation_started:
+            self._log_event(
+                f"wandb log: Starting to simulate. "
+                f"all_simulated = {self.solutions.all_simulated()}"
+            )
             self.solutions.simulate_to_num_sims(self.num_sims)
+            self._log_event("wandb log: Simulation ended.")
             best_elite = self.solutions.get_best_mean_solution()
             log_data.update(
                 {
@@ -141,3 +167,12 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
             )
 
         wandb.log(log_data)
+
+    def get_log_str(self) -> str:
+        log_lines = ["\nCallback Log:", "-" * 40]
+        log_lines.extend(self.callback_log)
+        log_lines.append("-" * 40)
+        return "\n".join(log_lines)
+
+    def print_log(self):
+        print(self.get_log_str())

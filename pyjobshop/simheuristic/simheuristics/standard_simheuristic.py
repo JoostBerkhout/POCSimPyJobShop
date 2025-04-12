@@ -1,22 +1,28 @@
 import time
-from typing import Tuple
+from typing import Tuple, TypedDict
 
 import wandb
 
 from pyjobshop import Result
-from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
 from pyjobshop.simheuristic.problems.Problem import Problem
 from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
 from pyjobshop.simheuristic.utils import init_wandb
 
 
+class StandardSimheuristicConfig(TypedDict):
+    num_sims: int
+    max_size_elite_set: int
+    frac_budget_before_sims: float
+    frac_budget_final_elites_sim: float
+
+
 def standard_simheuristic(
     problem: Problem,
-    simh_config: dict[str, int],
+    simh_config: StandardSimheuristicConfig,
     exp_config: dict[str, int],
     use_wandb: bool = False,
     wandb_config: dict[str, str] | None = None,
-) -> Tuple[EliteSolutions, Result, float]:
+) -> Tuple[SolutionCallback, Result, dict[str, float]]:
     """
     Runs a standard simheuristic on the given problem.
 
@@ -24,7 +30,7 @@ def standard_simheuristic(
     ----------
     problem : Problem
         The optimization problem instance (e.g., HybridFlowShop).
-    simh_config : dict[str, int]
+    simh_config : StandardSimheuristicConfig
         Configuration for the simheuristic (e.g., number of simulations).
     exp_config : dict[str, int]
         Configuration for the experiment (e.g., time limit).
@@ -35,14 +41,14 @@ def standard_simheuristic(
 
     Returns
     -------
-    elite_solutions : EliteSolutions
-        The elite solutions found during the simheuristic.
+    callback : SolutionCallback
+        A callback object that contains the found elite solutions.
     result : Result
         A Result object containing the best found solution and additional
         information about the solver run.
-    exp_duration : float
-        The duration of the experiment in seconds. It does not include the
-        loading duration of wandb if used.
+    durations : dict[str, float]
+        The durations of the experiment phases in seconds. It does not include
+        the loading and closing duration of wandb if used.
     """
 
     if use_wandb:
@@ -51,14 +57,14 @@ def standard_simheuristic(
         init_wandb(problem_name, save_config, wandb_config)
 
     start_time_exp = time.time()
+    durations = {}
 
     # Init
     time_limit = exp_config["time_limit"]
     num_sims = simh_config["num_sims"]
-    start_time_sims = simh_config["%_budget_before_sims"] * time_limit
+    start_time_sims = simh_config["frac_budget_before_sims"] * time_limit
     max_size_elite_set = simh_config["max_size_elite_set"]
-    remaining_time_limit = time_limit - (time.time() - start_time_exp)
-    assert remaining_time_limit > 0, "Time limit reached before experiment..."
+    time_final_sims = simh_config["frac_budget_final_elites_sim"] * time_limit
 
     # Generate problem data and build model
     data_generator = problem.build_data_generator()
@@ -66,25 +72,34 @@ def standard_simheuristic(
     model = problem.concrete_model(data)
 
     # Solve the problem using a callback for stochastic evaluations
-    current_time = time.time()
     callback = SolutionCallback(
         problem=problem,
         num_sims=num_sims,
         start_time_exp=start_time_exp,
-        start_time_sims=current_time + start_time_sims,
+        start_time_sims=start_time_exp + start_time_sims,
         max_size_elite_set=max_size_elite_set,
-        stop_time=current_time + remaining_time_limit,
+        stop_time=start_time_exp + time_limit - time_final_sims,
     )
     result = model.solve(
         callback=callback,
         display=False,
-        time_limit=remaining_time_limit,
+        time_limit=time_limit - time_final_sims,
         num_workers=exp_config["num_workers"],
     )
 
+    # Log times
+    time_spent = time.time() - start_time_exp
+    durations["solver_phase_dur"] = time_spent
+
+    # Simulate the elite solutions for the remaining time
+    callback.solutions.simulate_to_time_limit(time_limit - time_spent)
+
+    # Log times
     exp_duration = time.time() - start_time_exp
+    durations["final_sim_phase_dur"] = exp_duration - time_spent
+    durations["total_exp_dur"] = exp_duration
 
     if use_wandb:
         wandb.finish()
 
-    return callback.solutions, result, exp_duration
+    return callback, result, durations
