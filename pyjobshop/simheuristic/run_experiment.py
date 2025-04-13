@@ -7,8 +7,12 @@ from pyjobshop.simheuristic.problems.ParallelMachineProblem import (
 )
 from pyjobshop.simheuristic.simheuristics import (
     DynamicSimheuristicConfig,
+    SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
+    deterministic_optimization,
     dynamic_simheuristic,
+    simulate_last_solutions,
+    standard_simheuristic,
 )
 
 # init
@@ -17,12 +21,12 @@ GenericProblem = ParallelMachineProblem
 problem_name = GenericProblem.__name__
 problem_name_short = "".join([c for c in problem_name if c.isupper()])
 exp_config = {
-    "time_limit": 60,
+    "time_limit": 30,
     "num_rand_experiments": 1,
     "num_workers": 1,
     "num_sims_for_truth_expec_objective": 100,
 }
-stand_simh_config = {
+stand_simh_config: StandardSimheuristicConfig = {
     "num_sims": 25,
     "max_size_elite_set": 5,
     "frac_budget_before_sims": 0.5,
@@ -41,34 +45,32 @@ dyn_simh_config: DynamicSimheuristicConfig = {
     "frac_budget_final_elites_sim": 5 / exp_config["time_limit"],
     # frac_budget_final_elites_sim should be enough to sim. final
 }
-sim_last_config: StandardSimheuristicConfig = {
-    "num_sims": 0,
+sim_last_config: SimulateLastSolutionsConfig = {
     "max_size_elite_set": 10,
-    "frac_budget_before_sims": 1.1,
     "frac_budget_final_elites_sim": 0.4,  # should be enough to sim. final
 }
 simheuristics: dict[str, dict[str, Any]] = {
-    # "stand_simh": {
-    #     "simheuristic": standard_simheuristic,
-    #     "simh_config": stand_simh_config,
-    #     },
-    # "deterministic_opt": {
-    #     "simheuristic": deterministic_optimization,
-    #     "simh_config": dict(),
-    #     },
-    # "sim_last": {
-    #     "simheuristic": standard_simheuristic,
-    #     "simh_config": sim_last_config,
-    #     },
-    "dynamic_simh": {
+    "std_simh": {
+        "simheuristic": standard_simheuristic,
+        "simh_config": stand_simh_config,
+    },
+    "det_opt": {
+        "simheuristic": deterministic_optimization,
+        "simh_config": {},
+    },
+    "sim_last": {
+        "simheuristic": simulate_last_solutions,
+        "simh_config": sim_last_config,
+    },
+    "dyn_simh": {
         "simheuristic": dynamic_simheuristic,
         "simh_config": dyn_simh_config,
     },
 }
 results = []
 
-for simh_name, simh in simheuristics.items():
-    for seed in range(exp_config["num_rand_experiments"]):
+for seed in range(exp_config["num_rand_experiments"]):
+    for simh_name, simh in simheuristics.items():
         problem = GenericProblem(seed=seed)
 
         wandb_config = {
