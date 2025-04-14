@@ -1,8 +1,8 @@
 from typing import Any, Dict, Tuple
 
 from pyjobshop import Model
-from pyjobshop.simheuristic.DiscreteRV import DiscreteRV, SeededPoisson
-from pyjobshop.simheuristic.problems.Problem import Problem
+from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
+from simpyjobshop.problems.Problem import Problem
 
 
 class OneMachineTwoJobs(Problem):

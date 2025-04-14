@@ -1,8 +1,8 @@
 from typing import Dict
 
 from pyjobshop import Solution
-from pyjobshop.simheuristic.modeling import fix_solution
-from pyjobshop.simheuristic.problems.Problem import Problem
+from simpyjobshop.modeling import fix_solution
+from simpyjobshop.problems.Problem import Problem
 
 
 def evaluator(

@@ -1,7 +1,7 @@
 import time
 
-from pyjobshop.simheuristic.Simulator import Simulator
-from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
+from simpyjobshop.Simulator import Simulator
+from simpyjobshop.SolutionCallback import SolutionCallback
 from tests.simheuristics.problems.OneMachineTenJobs import OneMachineTenJobs
 
 

@@ -1,6 +1,6 @@
 from typing import Dict
 
-from pyjobshop.simheuristic.DiscreteRV import DiscreteRV
+from simpyjobshop.DiscreteRV import DiscreteRV
 
 
 class DataGenerator:

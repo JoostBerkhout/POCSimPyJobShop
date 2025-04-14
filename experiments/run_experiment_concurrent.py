@@ -4,14 +4,14 @@ from typing import Any, Type
 import pandas as pd
 from tqdm.contrib.concurrent import process_map
 
-from pyjobshop.simheuristic.experiments.SimheuristicSpec import (
+from simpyjobshop.experiments.SimheuristicSpec import (
     SimheuristicSpec,
 )
-from pyjobshop.simheuristic.problems.ParallelMachineProblem import (
+from simpyjobshop.problems.ParallelMachineProblem import (
     ParallelMachineProblem,
 )
-from pyjobshop.simheuristic.problems.Problem import Problem
-from pyjobshop.simheuristic.simheuristics import (
+from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.simheuristics import (
     DynamicSimheuristicConfig,
     SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
@@ -135,19 +135,6 @@ if __name__ == "__main__":
         SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
         SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
     ]
-
-    # results = []
-    # for seed in range(exp_config["num_rand_experiments"]):
-    #     for simh in simheuristics:
-    #         exp_result = run_experiment(
-    #             project_name=project_name,
-    #             GenericProblem=GenericProblem,
-    #             problem_seed=seed,
-    #             simheuristic=simh,
-    #             exp_config=exp_config,
-    #             use_wandb=use_wandb,
-    #         )
-    #         results.append(exp_result)
 
     # Build all combinations of (seed, simheuristic)
     combinations = [

@@ -4,8 +4,8 @@ from typing import Any, Dict, Tuple
 import numpy as np
 
 from pyjobshop import Model
-from pyjobshop.simheuristic.DiscreteRV import DiscreteRV, SeededPoisson
-from pyjobshop.simheuristic.problems.Problem import Problem
+from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
+from simpyjobshop.problems.Problem import Problem
 
 
 class SingleMachineProblem(Problem):
@@ -66,7 +66,7 @@ class SingleMachineProblem(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 10
+        num_jobs = 6
         loc = 1
         max_rand_mean = 10
         seed = 0

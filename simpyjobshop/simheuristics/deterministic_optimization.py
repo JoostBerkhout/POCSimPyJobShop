@@ -1,22 +1,17 @@
-from typing import Tuple, TypedDict
+from typing import Tuple
 
 from pyjobshop import Result
-from pyjobshop.simheuristic.problems.Problem import Problem
-from pyjobshop.simheuristic.simheuristics.standard_simheuristic import (
+from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.simheuristics.standard_simheuristic import (
     StandardSimheuristicConfig,
     standard_simheuristic,
 )
-from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
+from simpyjobshop.SolutionCallback import SolutionCallback
 
 
-class SimulateLastSolutionsConfig(TypedDict):
-    max_size_elite_set: int
-    frac_budget_final_elites_sim: float
-
-
-def simulate_last_solutions(
+def deterministic_optimization(
     problem: Problem,
-    simh_config: SimulateLastSolutionsConfig,
+    simh_config: dict,
     exp_config: dict[str, int],
     use_wandb: bool = False,
     wandb_config: dict[str, str] | None = None,
@@ -31,8 +26,8 @@ def simulate_last_solutions(
     ----------
     problem : Problem
         The optimization problem instance (e.g., HybridFlowShop).
-    simh_config : SimulateLastSolutionsConfig
-        Configuration for the simheuristic (e.g., elite set size).
+    simh_config : dict
+        To ensure a similar signature as a simheuristic. It is not used.
     exp_config : dict[str, int]
         Configuration for the experiment (e.g., time limit).
     use_wandb : bool, optional
@@ -52,12 +47,13 @@ def simulate_last_solutions(
         the loading and closing duration of wandb if used.
     """
 
-    frac_budget_final_elites_sim = simh_config["frac_budget_final_elites_sim"]
+    assert len(simh_config) == 0, "simh_config should be empty."
+
     _simh_config: StandardSimheuristicConfig = {
-        "num_sims": 0,  # no simulation during optimization
-        "max_size_elite_set": simh_config["max_size_elite_set"],
-        "frac_budget_before_sims": 1.1,  # no simulation during optimization
-        "frac_budget_final_elites_sim": frac_budget_final_elites_sim,
+        "num_sims": 0,
+        "max_size_elite_set": 1,
+        "frac_budget_before_sims": 1.1,
+        "frac_budget_final_elites_sim": 0.0,
     }
 
     return standard_simheuristic(

@@ -1,17 +1,16 @@
 from typing import Any
 
 import pandas as pd
+from matplotlib import pyplot as plt
 
-from pyjobshop.simheuristic.problems.ParallelMachineProblem import (
+from pyjobshop.plot import plot_machine_gantt
+from simpyjobshop.problems.ParallelMachineProblem import (
     ParallelMachineProblem,
 )
-from pyjobshop.simheuristic.simheuristics import (
+from simpyjobshop.simheuristics import (
     DynamicSimheuristicConfig,
     SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
-    deterministic_optimization,
-    dynamic_simheuristic,
-    simulate_last_solutions,
     standard_simheuristic,
 )
 
@@ -21,9 +20,9 @@ GenericProblem = ParallelMachineProblem
 problem_name = GenericProblem.__name__
 problem_name_short = "".join([c for c in problem_name if c.isupper()])
 exp_config = {
-    "time_limit": 30,
-    "num_rand_experiments": 1,
-    "num_workers": 1,
+    "time_limit": 150,
+    "num_rand_experiments": 10,
+    "num_workers": 8,
     "num_sims_for_truth_expec_objective": 100,
 }
 stand_simh_config: StandardSimheuristicConfig = {
@@ -54,18 +53,18 @@ simheuristics: dict[str, dict[str, Any]] = {
         "simheuristic": standard_simheuristic,
         "simh_config": stand_simh_config,
     },
-    "det_opt": {
-        "simheuristic": deterministic_optimization,
-        "simh_config": {},
-    },
-    "sim_last": {
-        "simheuristic": simulate_last_solutions,
-        "simh_config": sim_last_config,
-    },
-    "dyn_simh": {
-        "simheuristic": dynamic_simheuristic,
-        "simh_config": dyn_simh_config,
-    },
+    # "det_opt": {
+    #     "simheuristic": deterministic_optimization,
+    #     "simh_config": {},
+    # },
+    # "sim_last": {
+    #     "simheuristic": simulate_last_solutions,
+    #     "simh_config": sim_last_config,
+    # },
+    # "dyn_simh": {
+    #     "simheuristic": dynamic_simheuristic,
+    #     "simh_config": dyn_simh_config,
+    # },
 }
 results = []
 
@@ -122,7 +121,26 @@ for seed in range(exp_config["num_rand_experiments"]):
             | durations
         )
 
+        # Plot solutions
+        best_SCOP_sol = elite_solutions.get_best_mean_solution().solution
+        plot_solutions = {
+            "Best solution for deterministic problem": last_CP_results.best,
+            "Best solution for stochastic problem": best_SCOP_sol,
+        }
+        data_generator = problem.build_data_generator()
+        data = data_generator.int_mean()
+        model = problem.concrete_model(data)
+        for title, solution in plot_solutions.items():
+            plot_machine_gantt(
+                solution,
+                model.data(),
+                title=title + f" Seed {seed}",
+                plot_labels=True,
+            )
+            plt.show()
+
         callback.print_log()
+        elite_solutions.print_summary()
 
 # load as pandas df
 df = pd.DataFrame(results)

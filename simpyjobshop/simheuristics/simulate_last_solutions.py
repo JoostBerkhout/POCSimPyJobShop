@@ -1,17 +1,22 @@
-from typing import Tuple
+from typing import Tuple, TypedDict
 
 from pyjobshop import Result
-from pyjobshop.simheuristic.problems.Problem import Problem
-from pyjobshop.simheuristic.simheuristics.standard_simheuristic import (
+from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.simheuristics.standard_simheuristic import (
     StandardSimheuristicConfig,
     standard_simheuristic,
 )
-from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
+from simpyjobshop.SolutionCallback import SolutionCallback
 
 
-def deterministic_optimization(
+class SimulateLastSolutionsConfig(TypedDict):
+    max_size_elite_set: int
+    frac_budget_final_elites_sim: float
+
+
+def simulate_last_solutions(
     problem: Problem,
-    simh_config: dict,
+    simh_config: SimulateLastSolutionsConfig,
     exp_config: dict[str, int],
     use_wandb: bool = False,
     wandb_config: dict[str, str] | None = None,
@@ -26,8 +31,8 @@ def deterministic_optimization(
     ----------
     problem : Problem
         The optimization problem instance (e.g., HybridFlowShop).
-    simh_config : dict
-        To ensure a similar signature as a simheuristic. It is not used.
+    simh_config : SimulateLastSolutionsConfig
+        Configuration for the simheuristic (e.g., elite set size).
     exp_config : dict[str, int]
         Configuration for the experiment (e.g., time limit).
     use_wandb : bool, optional
@@ -47,13 +52,12 @@ def deterministic_optimization(
         the loading and closing duration of wandb if used.
     """
 
-    assert len(simh_config) == 0, "simh_config should be empty."
-
+    frac_budget_final_elites_sim = simh_config["frac_budget_final_elites_sim"]
     _simh_config: StandardSimheuristicConfig = {
-        "num_sims": 0,
-        "max_size_elite_set": 1,
-        "frac_budget_before_sims": 1.1,
-        "frac_budget_final_elites_sim": 0.0,
+        "num_sims": 0,  # no simulation during optimization
+        "max_size_elite_set": simh_config["max_size_elite_set"],
+        "frac_budget_before_sims": 1.1,  # no simulation during optimization
+        "frac_budget_final_elites_sim": frac_budget_final_elites_sim,
     }
 
     return standard_simheuristic(

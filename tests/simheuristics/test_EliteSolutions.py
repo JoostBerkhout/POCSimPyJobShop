@@ -4,8 +4,8 @@ from unittest.mock import ANY, Mock
 import pytest
 
 from pyjobshop import Solution
-from pyjobshop.simheuristic.EliteSolutions import EliteSolutions
-from pyjobshop.simheuristic.Simulator import Simulator
+from simpyjobshop.EliteSolutions import EliteSolutions
+from simpyjobshop.Simulator import Simulator
 
 
 @pytest.fixture

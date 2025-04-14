@@ -1,4 +1,4 @@
-from pyjobshop.simheuristic.problems.SingleMachineProblem import (
+from simpyjobshop.problems.SingleMachineProblem import (
     SingleMachineProblem,
 )
 

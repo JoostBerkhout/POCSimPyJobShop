@@ -3,12 +3,12 @@ from typing import Any, Dict, Tuple
 import numpy as np
 
 from pyjobshop import Model
-from pyjobshop.simheuristic.DiscreteRV import (
+from simpyjobshop.DiscreteRV import (
     Constant,
     DiscreteRV,
     SeededPoisson,
 )
-from pyjobshop.simheuristic.problems.Problem import Problem
+from simpyjobshop.problems.Problem import Problem
 
 
 class HybridFlowShop(Problem):
@@ -88,7 +88,7 @@ class HybridFlowShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 4
+        num_jobs = 8
         num_stages = 3
         num_machines = [2, 3, 2]
         loc = 1

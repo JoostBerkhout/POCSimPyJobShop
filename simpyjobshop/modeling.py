@@ -2,8 +2,8 @@ import itertools
 from typing import Dict, Optional
 
 from pyjobshop import Machine, Model, Solution
-from pyjobshop.simheuristic.problems.Problem import Problem
-from pyjobshop.simheuristic.utils import find_schedule_per_resource
+from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.utils import find_schedule_per_resource
 
 
 def fix_solution(solution: Solution, model: Model) -> Model:

@@ -1,8 +1,8 @@
 from typing import Any, Dict, Tuple
 
 from pyjobshop import Model
-from pyjobshop.simheuristic.DataGenerator import DataGenerator
-from pyjobshop.simheuristic.DiscreteRV import DiscreteRV
+from simpyjobshop.DataGenerator import DataGenerator
+from simpyjobshop.DiscreteRV import DiscreteRV
 
 
 class Problem:

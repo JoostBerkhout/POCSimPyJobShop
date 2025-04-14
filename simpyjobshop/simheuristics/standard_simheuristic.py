@@ -4,9 +4,9 @@ from typing import Tuple, TypedDict
 import wandb
 
 from pyjobshop import Result
-from pyjobshop.simheuristic.problems.Problem import Problem
-from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
-from pyjobshop.simheuristic.utils import init_wandb
+from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.SolutionCallback import SolutionCallback
+from simpyjobshop.utils import init_wandb
 
 
 class StandardSimheuristicConfig(TypedDict):

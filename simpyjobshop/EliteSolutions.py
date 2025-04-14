@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 from pyjobshop import Solution
-from pyjobshop.simheuristic.Simulator import Simulator
-from pyjobshop.simheuristic.utils import find_schedule_per_resource
+from simpyjobshop.Simulator import Simulator
+from simpyjobshop.utils import find_schedule_per_resource
 
 
 @dataclass

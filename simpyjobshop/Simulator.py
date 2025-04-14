@@ -4,8 +4,8 @@ from typing import List
 import numpy as np
 
 from pyjobshop import Solution
-from pyjobshop.simheuristic.evaluator import evaluator
-from pyjobshop.simheuristic.problems.Problem import Problem
+from simpyjobshop.evaluator import evaluator
+from simpyjobshop.problems.Problem import Problem
 
 
 class Simulator:

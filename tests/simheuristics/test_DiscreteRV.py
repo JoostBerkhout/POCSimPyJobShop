@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from scipy.stats import poisson
 
-from pyjobshop.simheuristic.DiscreteRV import (
+from simpyjobshop.DiscreteRV import (
     Constant,
     DiscreteRV,
     SeededPoisson,

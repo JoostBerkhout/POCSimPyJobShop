@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pyjobshop.simheuristic.DataGenerator import DataGenerator
-from pyjobshop.simheuristic.DiscreteRV import DiscreteRV
+from simpyjobshop.DataGenerator import DataGenerator
+from simpyjobshop.DiscreteRV import DiscreteRV
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 from pyjobshop import Solution, TaskData
-from pyjobshop.simheuristic.evaluator import evaluator
+from simpyjobshop.evaluator import evaluator
 from tests.simheuristics.problems.OneMachineTwoJobs import OneMachineTwoJobs
 from tests.simheuristics.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
 

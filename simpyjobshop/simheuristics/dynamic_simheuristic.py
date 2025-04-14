@@ -5,12 +5,12 @@ import numpy as np
 import wandb
 
 from pyjobshop import Result
-from pyjobshop.simheuristic.modeling import (
+from simpyjobshop.modeling import (
     find_solution_for_other_concrete_model,
 )
-from pyjobshop.simheuristic.problems.Problem import Problem
-from pyjobshop.simheuristic.SolutionCallback import SolutionCallback
-from pyjobshop.simheuristic.utils import init_wandb
+from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.SolutionCallback import SolutionCallback
+from simpyjobshop.utils import init_wandb
 
 
 class DynamicSimheuristicConfig(TypedDict):

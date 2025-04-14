@@ -4,8 +4,8 @@ from typing import Any, Dict, Tuple
 import numpy as np
 
 from pyjobshop import Model
-from pyjobshop.simheuristic.DiscreteRV import DiscreteRV, SeededPoisson
-from pyjobshop.simheuristic.problems.Problem import Problem
+from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
+from simpyjobshop.problems.Problem import Problem
 
 
 class ParallelMachineProblem(Problem):
@@ -73,11 +73,11 @@ class ParallelMachineProblem(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 10
+        num_jobs = 40
         num_machines = 4
         loc = 1
         max_rand_mean = 10
-        seed = 2
+        max_setup_time = 10
 
         # job durations
         np.random.seed(seed)  # for reproducibility
@@ -93,7 +93,7 @@ class ParallelMachineProblem(Problem):
 
         # setup times
         setup_times = {
-            (m, i, j): np.random.randint(1, num_jobs)
+            (m, i, j): np.random.randint(1, max_setup_time)
             for i, j in itertools.permutations(range(num_jobs), 2)
             for m in range(num_machines)
         }
