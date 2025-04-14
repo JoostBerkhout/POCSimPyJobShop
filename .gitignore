@@ -132,7 +132,6 @@ dmypy.json
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
-*.log
 *.lot
 *.fls
 *.out
@@ -422,3 +421,6 @@ statistics/*.csv
 *.DS_STORE
 notes.org
 old/
+*.png
+*.lock
+pyjobshop/simheuristic/experiments/wandb/*
