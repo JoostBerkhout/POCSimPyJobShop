@@ -30,7 +30,12 @@ class Simulator:
         self.data_generator = problem.build_data_generator()
         self.results: List[float] = []
 
-    def simulate(self, num_sims: int, time_limit: float | None = None):
+    def simulate(
+        self,
+        num_sims: int,
+        time_limit: float | None = None,
+        num_workers: int | None = None,
+    ) -> None:
         """
         Performs num_sims simulation runs and stores the results.
 
@@ -40,6 +45,8 @@ class Simulator:
             The number of simulations to run.
         time_limit : float, optional
             Time limit (in seconds) for simulate(), by default None.
+        num_workers : int, optional
+            Number of workers in evaluator, by default None.
         """
 
         start_time = None if time_limit is None else time.time()
@@ -51,7 +58,7 @@ class Simulator:
                     break
 
             data = self.data_generator.random()
-            result = evaluator(self.solution, self.problem, data)
+            result = evaluator(self.solution, self.problem, data, num_workers)
             self.results.append(result)
 
     @property
