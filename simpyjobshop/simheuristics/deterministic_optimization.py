@@ -30,8 +30,6 @@ def deterministic_optimization(
         To ensure a similar signature as a simheuristic. It is not used.
     exp_config : dict[str, int]
         Configuration for the experiment (e.g., time limit).
-    use_wandb : bool, optional
-        Whether to log progress to Weights & Biases, by default False.
     wandb_config : dict[str, str], optional
         Configuration for Weights & Biases logging, by default None.
 
@@ -60,6 +58,5 @@ def deterministic_optimization(
         problem,
         simh_config=_simh_config,
         exp_config=exp_config,
-        use_wandb=use_wandb,
         wandb_config=wandb_config,
     )

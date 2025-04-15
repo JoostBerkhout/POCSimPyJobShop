@@ -54,7 +54,6 @@ def dynamic_simheuristic(
     problem: Problem,
     simh_config: DynamicSimheuristicConfig,
     exp_config: dict[str, int],
-    use_wandb: bool = False,
     wandb_config: dict[str, str] | None = None,
 ) -> Tuple[SolutionCallback, Result, dict[str, float]]:
     """
@@ -68,8 +67,6 @@ def dynamic_simheuristic(
         Configuration for the simheuristic (e.g., number of simulations).
     exp_config : dict[str, int]
         Configuration for the experiment (e.g., time limit).
-    use_wandb : bool, optional
-        Whether to log progress to Weights & Biases, by default False.
     wandb_config : dict[str, str], optional
         Configuration for Weights & Biases logging, by default None.
 
@@ -85,7 +82,7 @@ def dynamic_simheuristic(
         the loading and closing duration of wandb if used.
     """
 
-    if use_wandb:
+    if exp_config["use_wandb"]:
         problem_name = problem.__class__.__name__
         save_config = {"exp_config": exp_config, "simh_config": simh_config}
         init_wandb(problem_name, save_config, wandb_config)
@@ -165,6 +162,8 @@ def dynamic_simheuristic(
 
         # Update scores
         solutions = callback.solutions
+        if solutions.none_simulated():
+            solutions.simulate_to_num_sims(num_sims)
         best_obj = solutions.get_best_mean_solution().simulator.mean
         worst_obj = solutions.get_worst_mean_solution().simulator.mean
         if best_obj < best_objective_elite:
@@ -176,8 +175,6 @@ def dynamic_simheuristic(
             worst_objective_elite = worst_obj
 
         time_spend = time.time() - start_time_exp
-
-    callback.print_log()
 
     # Log times
     time_spent = time.time() - start_time_exp
@@ -191,7 +188,7 @@ def dynamic_simheuristic(
     durations["final_sim_phase_dur"] = exp_duration - time_spent
     durations["total_exp_dur"] = exp_duration
 
-    if use_wandb:
+    if exp_config["use_wandb"]:
         wandb.finish()
 
     return callback, result, durations
