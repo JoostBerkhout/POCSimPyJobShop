@@ -88,9 +88,9 @@ class HybridFlowShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 40
+        num_jobs = 60
         num_stages = 3
-        num_machines = [2, 3, 2]
+        num_machines = [4, 5, 4]
         loc = 1
         max_rand_mean = 15
         prob_random_duration = 0.3
