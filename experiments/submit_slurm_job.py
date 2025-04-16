@@ -25,7 +25,7 @@ JOBSCRIPT = """#!/bin/sh
 #SBATCH --mail-user=joost.berkhout@vu.nl
 #SBATCH --out=slurm/{job_name}-%A_%a.out
 
-uv run cli_run_experiments.py \
+uv run experiments/cli_run_experiments.py \
 --problem {problem} \
 """
 
