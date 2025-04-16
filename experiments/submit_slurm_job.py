@@ -20,7 +20,7 @@ JOBSCRIPT = """#!/bin/sh
 #SBATCH --partition=genoa
 #SBATCH --array=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=192
+#SBATCH --cpus-per-task={num_cpus}
 #SBATCH --mail-type=FAIL,END
 #SBATCH --mail-user=joost.berkhout@vu.nl
 #SBATCH --out=slurm/{job_name}-%A_%a.out
@@ -28,6 +28,10 @@ JOBSCRIPT = """#!/bin/sh
 uv run cli_run_experiments.py \
 --problem {problem} \
 """
+
+
+MIN_NUM_CPUS = 24
+MAX_NUM_CPUS = 192
 
 
 def main(problem: str, mock: bool):
@@ -50,17 +54,21 @@ def main(problem: str, mock: bool):
     sim_time = exp_config["num_sims_for_true_expec_objective"] * time_per_sim
     run_time = exp_config["time_limit"] + sim_time
     num_exps = exp_config["num_rand_experiments"] * num_simh
+    num_workers = exp_config["num_workers"]
     num_parallel_instances = exp_config["num_parallel_instances"]
     num_consec_proc = ceil(num_exps / num_parallel_instances)
     total_time = num_consec_proc * run_time
     buffer = 5 * 60  # 5 minutes buffer
     job_time_limit = seconds_to_string(int(total_time + buffer))
-    check_cpu_use(num_parallel_instances, exp_config["num_workers"])
+    check_cpu_use(num_parallel_instances, num_workers, MAX_NUM_CPUS)
+    num_cpus = min(MAX_NUM_CPUS, num_parallel_instances * num_workers)
+    num_cpus = max(num_cpus, MIN_NUM_CPUS)
 
     jobscript = JOBSCRIPT.format(
         job_name=job_name,
         job_time_limit=job_time_limit,
         problem=problem,
+        num_cpus=num_cpus,
     )
 
     if mock:

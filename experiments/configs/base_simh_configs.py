@@ -5,9 +5,6 @@ from simpyjobshop.simheuristics import (
     SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
     deterministic_optimization,
-    dynamic_simheuristic,
-    simulate_last_solutions,
-    standard_simheuristic,
 )
 
 # Simheuristic configurations
@@ -36,8 +33,8 @@ sim_last_config: SimulateLastSolutionsConfig = {
 }
 
 simheuristics: list[SimheuristicSpec] = [
-    SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
+    # SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
     SimheuristicSpec("det_opt", deterministic_optimization, {}),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
-    SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
+    # SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
+    # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
 ]
