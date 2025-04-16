@@ -88,7 +88,7 @@ class HybridFlowShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 8
+        num_jobs = 40
         num_stages = 3
         num_machines = [2, 3, 2]
         loc = 1
@@ -138,7 +138,7 @@ class HybridFlowShop(Problem):
                 stage_finish_times[first] = (
                     finish_times_prev_stage[first] + durations[first]
                 )
-                for i, j in zip(schedule[:-1], schedule[1:]):
+                for i, j in zip(schedule[:-1], schedule[1:], strict=True):
                     start_time = max(
                         stage_finish_times[i], finish_times_prev_stage[j]
                     )
