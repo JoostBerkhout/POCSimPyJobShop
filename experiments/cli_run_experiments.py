@@ -53,7 +53,8 @@ def main(problem: str, problem_cls: Type[Problem]):
 
     # load as pandas df
     df = pd.DataFrame(results)
-    df.to_csv(f"results/{project_name}.csv", index=False)
+    results_dir = Path(__file__).resolve().parent / "results"
+    df.to_csv(results_dir / f"{project_name}.csv", index=False)
 
     duration = time.time() - start_time
     print(f"Finished experiments in {duration:.2f} seconds.")
