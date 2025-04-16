@@ -423,4 +423,4 @@ notes.org
 old/
 *.png
 *.lock
-pyjobshop/simheuristic/experiments/wandb/*
+experiments/wandb/*
