@@ -5,9 +5,8 @@ import numpy as np
 import wandb
 
 from pyjobshop import Result
-from simpyjobshop.modeling import (
-    find_solution_for_other_concrete_model,
-)
+from simpyjobshop.EliteSolutions import EliteSolutions
+from simpyjobshop.modeling import find_solution_for_other_data
 from simpyjobshop.problems.Problem import Problem
 from simpyjobshop.SolutionCallback import SolutionCallback
 from simpyjobshop.utils import init_wandb
@@ -35,18 +34,45 @@ def parse_model_key(model_key: str) -> float:
     return 0.0
 
 
-def log_model(callback: SolutionCallback, model_key: str) -> None:
-    wandb.log(
-        {
-            "Time (in seconds)": callback.time_spent,
-            "Deterministic model": parse_model_key(model_key),
-        }
-    )
+def log_model(
+    callback: SolutionCallback, model_key: str, objective_value: float | None
+):
+    log_data = {
+        "Time (in seconds)": callback.time_spent,
+        "Deterministic model": parse_model_key(model_key),
+    }
+
+    if objective_value is not None:
+        log_data.update(
+            {
+                "Objective new candidate": objective_value,
+            }
+        )
+
+    wandb.log(log_data)
 
 
-def select_model_key(scores):
-    keys, values = zip(*scores.items())
-    probs = np.array(values) / sum(values)
+def select_weighted_random_key(scores: dict[str, int]) -> str:
+    """
+    Randomly select a key with selection probability proportional to its score.
+
+    Parameters
+    ----------
+    scores : dict[str, int]
+        Dictionary mapping strings to non-negative integer scores. Scores
+        are normalized to form a probability distribution.
+
+    Returns
+    -------
+    str
+        A randomly selected key, weighted by the corresponding score.
+    """
+
+    keys, values = zip(*scores.items(), strict=True)
+    total = sum(values)
+    if total == 0:
+        raise ValueError("Ensure not all scores are zero.")
+    probs = np.array(values) / total
     return np.random.choice(keys, p=probs)
 
 
@@ -92,14 +118,15 @@ def dynamic_simheuristic(
 
     # Set concrete models
     concrete_models = {}
+    data = {}
     data_generator = problem.build_data_generator()
     if simh_config["consider_mean"]:
-        mean_data = data_generator.int_mean()
-        concrete_models["mean"] = problem.concrete_model(mean_data)
+        data["mean"] = data_generator.int_mean()
+        concrete_models["mean"] = problem.concrete_model(data["mean"])
     for quantile in simh_config["quantiles"]:
-        model_name = f"quantile_{quantile}"
-        quant_data = data_generator.quantile(quantile)
-        concrete_models[model_name] = problem.concrete_model(quant_data)
+        key = f"quantile_{quantile}"
+        data[key] = data_generator.quantile(quantile)
+        concrete_models[key] = problem.concrete_model(data[key])
 
     # Set init scores
     scores = {k: simh_config["init_score"] for k in concrete_models.keys()}
@@ -113,8 +140,7 @@ def dynamic_simheuristic(
     solve_time_limit = time_limit - time_final_sims
 
     # Technical init
-    best_objective_elite = np.inf
-    worst_objective_elite = np.inf
+    elite_tracker = {"worst mean": float("inf"), "best mean": float("inf")}
     callback = SolutionCallback(
         problem=problem,
         num_sims=num_sims,
@@ -129,21 +155,21 @@ def dynamic_simheuristic(
 
     while time_spend < solve_time_limit:
         # Randomly select model based on scores
-        probs = np.array(list(scores.values())) / sum(scores.values())
-        model_key = np.random.choice(list(scores.keys()), p=list(probs))
+        model_key = select_weighted_random_key(scores)
 
-        # Update model if needed
+        # Set model and update current solution if needed
+        model = concrete_models[model_key]
         new_model = model_key != old_model_key
-        if new_model:
-            old_model_key = model_key
-            model = concrete_models[model_key]
-
-            if current_solution is not None:
-                # Update current solution for new model
-                current_solution = find_solution_for_other_concrete_model(
-                    current_solution, model
-                )
-        log_model(callback, model_key)
+        old_model_used = old_model_key is not None
+        update_current_solution = new_model and old_model_used
+        old_model_key = model_key
+        new_obj_val = None
+        if update_current_solution:
+            assert current_solution is not None
+            current_solution, new_obj_val = find_solution_for_other_data(
+                current_solution, problem, data[model_key]
+            )
+        log_model(callback, model_key, new_obj_val)
 
         # Solve the problem using a callback for stochastic evaluations
         cp_time_limit = min(
@@ -151,7 +177,7 @@ def dynamic_simheuristic(
             simh_config["max_time_per_cp_solve"],
         )
         callback.stop_time = time.time() + cp_time_limit
-        callback._log_event(f"Starting CP solver with {model_key}.")
+        callback._log_event(f"Starting CP solver with {model_key} ({scores}).")
         result = model.solve(
             callback=callback,
             display=False,
@@ -160,19 +186,12 @@ def dynamic_simheuristic(
             num_workers=exp_config["num_workers"],
         )
 
+        # Update current solution
+        current_solution = result.best
+
         # Update scores
         solutions = callback.solutions
-        if solutions.none_simulated():
-            solutions.simulate_to_num_sims(num_sims)
-        best_obj = solutions.get_best_mean_solution().simulator.mean
-        worst_obj = solutions.get_worst_mean_solution().simulator.mean
-        if best_obj < best_objective_elite:
-            scores[model_key] += simh_config["score_finding_new_best"]
-            best_objective_elite = best_obj
-            worst_objective_elite = worst_obj  # by definition new worst
-        elif worst_obj < worst_objective_elite:
-            scores[model_key] += simh_config["score_finding_new_elite"]
-            worst_objective_elite = worst_obj
+        update_scores(solutions, elite_tracker, scores, model_key, simh_config)
 
         time_spend = time.time() - start_time_exp
 
@@ -192,3 +211,32 @@ def dynamic_simheuristic(
         wandb.finish()
 
     return callback, result, durations
+
+
+def update_scores(
+    solutions: EliteSolutions,
+    elite_tracker: dict[str, float],
+    scores: dict[str, int],
+    model_key: str,
+    simh_config: DynamicSimheuristicConfig,
+):
+    """Helper function to update the scores in-place."""
+    if solutions.none_simulated():
+        print(
+            "Warning: No solutions simulated yet. Not expected. I will "
+            "simulate them all now..."
+        )
+        solutions.simulate_to_num_sims(simh_config["num_sims"])
+    best_obj = solutions.get_best_mean_solution().simulator.mean
+    worst_obj = solutions.get_worst_mean_solution().simulator.mean
+    if best_obj < elite_tracker["best mean"]:
+        scores[model_key] += simh_config["score_finding_new_best"]
+        elite_tracker["best mean"] = best_obj
+        elite_tracker["worst mean"] = worst_obj  # by definition new worst
+    elif worst_obj < elite_tracker["worst mean"]:
+        scores[model_key] += simh_config["score_finding_new_elite"]
+        elite_tracker["worst mean"] = worst_obj
+    else:
+        scores[model_key] -= simh_config["init_score"]
+        if scores[model_key] < simh_config["init_score"]:
+            scores[model_key] = simh_config["init_score"]

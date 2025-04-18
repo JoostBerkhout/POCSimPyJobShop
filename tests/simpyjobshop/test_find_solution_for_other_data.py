@@ -29,11 +29,12 @@ def test_find_solution_for_other_data_one_machine_two_jobs():
     duration2 = 11
     data[f"duration_{first}"] = duration1
     data[f"duration_{second}"] = duration2
-    new_solution = find_solution_for_other_data(solution, problem, data)
+    new_solution, obj = find_solution_for_other_data(solution, problem, data)
     new_schedule = find_schedule_per_resource(new_solution)[0]
 
     # Check if the new solution is correct
     assert schedule == new_schedule
+    assert obj == 32
     assert new_solution.tasks[first].start == 0
     assert new_solution.tasks[first].end == duration1
     assert new_solution.tasks[second].start == duration1
@@ -54,6 +55,7 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
 
     # Find best solution
     result = model.solve(display=False)
+    assert result.objective == 1
     solution = result.best
     schedule = find_schedule_per_resource(solution)
 
@@ -62,11 +64,12 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     duration2 = 11
     data["duration_0"] = duration1
     data["duration_1"] = duration2
-    new_solution = find_solution_for_other_data(solution, problem, data)
+    new_solution, obj = find_solution_for_other_data(solution, problem, data)
     new_schedule = find_schedule_per_resource(new_solution)
 
     # Check if the new solution is correct
     assert schedule == new_schedule
+    assert obj == 21
     assert new_solution.tasks[0].start == 0
     assert new_solution.tasks[0].end == duration1
     assert new_solution.tasks[1].start == 0
@@ -89,11 +92,12 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     schedule = find_schedule_per_resource(solution)
 
     # Find solution for changed data
-    new_solution = find_solution_for_other_data(solution, problem, data)
+    new_solution, obj = find_solution_for_other_data(solution, problem, data)
     new_schedule = find_schedule_per_resource(new_solution)
 
     # Check if the new solution is correct
     assert schedule == new_schedule
+    assert obj == 32
     assert new_solution.tasks[0].start == 0
     assert new_solution.tasks[0].end == duration1
     assert new_solution.tasks[1].start == duration1
@@ -116,11 +120,12 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     schedule = find_schedule_per_resource(solution)
 
     # Find solution for changed data
-    new_solution = find_solution_for_other_data(solution, problem, data)
+    new_solution, obj = find_solution_for_other_data(solution, problem, data)
     new_schedule = find_schedule_per_resource(new_solution)
 
     # Check if the new solution is correct
     assert schedule == new_schedule
+    assert obj == 32 + 10
     assert new_solution.tasks[0].start == duration2 + 10
     assert new_solution.tasks[0].end == duration1 + duration2 + 10
     assert new_solution.tasks[1].start == 0

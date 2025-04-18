@@ -15,8 +15,10 @@ class TwoMachinesTwoJobs(Problem):
     def concrete_model(data: Dict[str, Any]) -> Model:
         # Unpack data
         num_jobs = data["num_jobs"]
+        num_machines = data["num_machines"]
         durations = [data[f"duration_{j}"] for j in range(num_jobs)]
         due_dates = [data[f"due_date_{j}"] for j in range(num_jobs)]
+        setup_t_1_to_0 = data["setup_time_1_to_0"]
         objective_weights = {
             "weight_makespan": data["weight_makespan"],
             "weight_tardy_jobs": data["weight_tardy_jobs"],
@@ -29,7 +31,7 @@ class TwoMachinesTwoJobs(Problem):
 
         # Create model
         model = Model()
-        machines = [model.add_machine() for _ in range(2)]
+        machines = [model.add_machine() for _ in range(num_machines)]
         jobs = [model.add_job(due_date=due_dates[i]) for i in range(num_jobs)]
         tasks = [model.add_task(job=job) for job in jobs]
 
@@ -40,7 +42,7 @@ class TwoMachinesTwoJobs(Problem):
 
         # Add sequence-dependent setup time
         for machine in machines:
-            model.add_setup_time(machine, tasks[1], tasks[0], 10)
+            model.add_setup_time(machine, tasks[1], tasks[0], setup_t_1_to_0)
 
         # Set objective
         model.set_objective(**objective_weights)
@@ -54,6 +56,8 @@ class TwoMachinesTwoJobs(Problem):
         constants: Dict[str, int] = {}
 
         num_jobs = 2
+        num_machines = 2
+        setup_time_1_to_0 = 10
 
         # job durations
         mean_job_durations = [1, 1]
@@ -65,8 +69,10 @@ class TwoMachinesTwoJobs(Problem):
 
         # store constants
         constants["num_jobs"] = num_jobs
+        constants["num_machines"] = num_machines
         for i, due_date in enumerate(due_dates):
             constants[f"due_date_{i}"] = due_date
+        constants["setup_time_1_to_0"] = setup_time_1_to_0
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0

@@ -66,7 +66,7 @@ def run_experiment(
         elite = elite_solutions.get_best_deterministic_solution()
     else:
         raise Exception(
-            "Some elites are simulated and some not. " "This is not expected."
+            "Some elites are simulated and some not. This is not expected."
         )
 
     # Simulate elite

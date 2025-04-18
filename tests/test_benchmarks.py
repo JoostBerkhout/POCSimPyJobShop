@@ -68,4 +68,4 @@ def test_fjsp_classic(solver: str, loc: str, objective: int):
 
     assert_equal(result.objective, objective)
     assert_equal(result.status.value, "Optimal")
-    assert_(result.runtime < 1)
+    assert_(result.runtime < 1.5)

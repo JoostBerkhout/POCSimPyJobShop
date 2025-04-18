@@ -17,6 +17,7 @@ class OneMachineTwoJobs(Problem):
         num_jobs = data["num_jobs"]
         durations = [data[f"duration_{j}"] for j in range(num_jobs)]
         due_dates = [data[f"due_date_{j}"] for j in range(num_jobs)]
+        setup_time_1_to_0 = data["setup_time_1_to_0"]
         objective_weights = {
             "weight_makespan": data["weight_makespan"],
             "weight_tardy_jobs": data["weight_tardy_jobs"],
@@ -38,7 +39,7 @@ class OneMachineTwoJobs(Problem):
             model.add_mode(task, machine, duration=duration)
 
         # Add sequence-dependent setup time
-        model.add_setup_time(machine, tasks[1], tasks[0], 10)
+        model.add_setup_time(machine, tasks[1], tasks[0], setup_time_1_to_0)
 
         # Set objective
         model.set_objective(**objective_weights)
@@ -52,6 +53,7 @@ class OneMachineTwoJobs(Problem):
         constants: Dict[str, int] = {}
 
         num_jobs = 2
+        setup_time_1_to_0 = 10
 
         # job durations
         mean_job_durations = [1, 1]
@@ -65,6 +67,7 @@ class OneMachineTwoJobs(Problem):
         constants["num_jobs"] = num_jobs
         for i, due_date in enumerate(due_dates):
             constants[f"due_date_{i}"] = due_date
+        constants["setup_time_1_to_0"] = setup_time_1_to_0
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0
