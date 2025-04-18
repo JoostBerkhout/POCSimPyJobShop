@@ -106,7 +106,7 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                     simulator.simulate(self.num_sims)
                 else:
                     self._log_event(
-                        f"Simulation skipped, not yet allowed. Start time "
+                        f"Simulation skipped: not yet allowed. Start time "
                         f"sims. = {self.start_time_sims - self.start_time_exp}"
                     )
 

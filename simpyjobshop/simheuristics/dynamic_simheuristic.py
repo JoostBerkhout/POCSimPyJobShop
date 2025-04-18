@@ -5,7 +5,6 @@ import numpy as np
 import wandb
 
 from pyjobshop import Result
-from simpyjobshop.EliteSolutions import EliteSolutions
 from simpyjobshop.modeling import find_solution_for_other_data
 from simpyjobshop.problems.Problem import Problem
 from simpyjobshop.SolutionCallback import SolutionCallback
@@ -190,8 +189,7 @@ def dynamic_simheuristic(
         current_solution = result.best
 
         # Update scores
-        solutions = callback.solutions
-        update_scores(solutions, elite_tracker, scores, model_key, simh_config)
+        update_scores(callback, elite_tracker, scores, model_key, simh_config)
 
         time_spend = time.time() - start_time_exp
 
@@ -214,19 +212,22 @@ def dynamic_simheuristic(
 
 
 def update_scores(
-    solutions: EliteSolutions,
+    callback: SolutionCallback,
     elite_tracker: dict[str, float],
     scores: dict[str, int],
     model_key: str,
     simh_config: DynamicSimheuristicConfig,
 ):
     """Helper function to update the scores in-place."""
+    solutions = callback.solutions
     if solutions.none_simulated():
-        print(
-            "Warning: No solutions simulated yet. Not expected. I will "
-            "simulate them all now..."
+        msg = (
+            "Updating scores, but no solutions simulated yet. They will"
+            " be simulated now."
         )
+        callback._log_event(msg)
         solutions.simulate_to_num_sims(simh_config["num_sims"])
+        callback._log_event("Simulation finished.")
     best_obj = solutions.get_best_mean_solution().simulator.mean
     worst_obj = solutions.get_worst_mean_solution().simulator.mean
     if best_obj < elite_tracker["best mean"]:
