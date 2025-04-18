@@ -1,8 +1,8 @@
 from pyjobshop import Solution, TaskData
 from simpyjobshop.modeling import find_solution_for_other_data
 from simpyjobshop.utils import find_schedule_per_resource
-from tests.simheuristics.problems.OneMachineTwoJobs import OneMachineTwoJobs
-from tests.simheuristics.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
+from tests.simpyjobshop.problems.OneMachineTwoJobs import OneMachineTwoJobs
+from tests.simpyjobshop.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
 
 
 def test_find_solution_for_other_data_one_machine_two_jobs():

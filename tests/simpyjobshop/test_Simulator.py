@@ -2,7 +2,7 @@ import time
 
 from simpyjobshop.Simulator import Simulator
 from simpyjobshop.SolutionCallback import SolutionCallback
-from tests.simheuristics.problems.OneMachineTenJobs import OneMachineTenJobs
+from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
 
 
 def test_simulator():

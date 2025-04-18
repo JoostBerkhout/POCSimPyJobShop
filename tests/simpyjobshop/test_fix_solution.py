@@ -6,9 +6,9 @@ from pyjobshop import Solution, TaskData
 from simpyjobshop.modeling import fix_solution
 from simpyjobshop.SolutionCallback import SolutionCallback
 from simpyjobshop.utils import find_schedule_per_resource
-from tests.simheuristics.problems.OneMachineTenJobs import OneMachineTenJobs
-from tests.simheuristics.problems.OneMachineTwoJobs import OneMachineTwoJobs
-from tests.simheuristics.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
+from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
+from tests.simpyjobshop.problems.OneMachineTwoJobs import OneMachineTwoJobs
+from tests.simpyjobshop.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
 
 
 @pytest.fixture(params=[OneMachineTwoJobs(), TwoMachinesTwoJobs()])
@@ -31,7 +31,7 @@ def equal_solutions(
     it changes the modes indices used (in solution2).
     """
 
-    for task1, task2 in zip(solution1.tasks, solution2.tasks):
+    for task1, task2 in zip(solution1.tasks, solution2.tasks, strict=True):
         if task1.resources != task2.resources:
             return False
         if task1.start != task2.start:

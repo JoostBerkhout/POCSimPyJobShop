@@ -1,7 +1,7 @@
 import time
 
 from simpyjobshop.SolutionCallback import SolutionCallback
-from tests.simheuristics.problems.OneMachineTenJobs import OneMachineTenJobs
+from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
 
 
 def test_solution_callback():

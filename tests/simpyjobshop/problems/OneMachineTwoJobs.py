@@ -5,7 +5,7 @@ from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
 from simpyjobshop.problems.Problem import Problem
 
 
-class TwoMachinesTwoJobs(Problem):
+class OneMachineTwoJobs(Problem):
     """
     Specific implementation of a single-machine scheduling problem with
     two jobs. Based on objectives_examples.ipynb.
@@ -29,18 +29,16 @@ class TwoMachinesTwoJobs(Problem):
 
         # Create model
         model = Model()
-        machines = [model.add_machine() for _ in range(2)]
+        machine = model.add_machine()
         jobs = [model.add_job(due_date=due_dates[i]) for i in range(num_jobs)]
         tasks = [model.add_task(job=job) for job in jobs]
 
         # Add modes to the model
-        for task, duration in zip(tasks, durations):
-            for machine in machines:
-                model.add_mode(task, machine, duration=duration)
+        for task, duration in zip(tasks, durations, strict=True):
+            model.add_mode(task, machine, duration=duration)
 
         # Add sequence-dependent setup time
-        for machine in machines:
-            model.add_setup_time(machine, tasks[1], tasks[0], 10)
+        model.add_setup_time(machine, tasks[1], tasks[0], 10)
 
         # Set objective
         model.set_objective(**objective_weights)
@@ -61,7 +59,7 @@ class TwoMachinesTwoJobs(Problem):
             gen = SeededPoisson(lam=mean_job_durations[i], seed=i)
             distributions[f"duration_{i}"] = gen
 
-        due_dates = [1, 1]
+        due_dates = [12, 1]
 
         # store constants
         constants["num_jobs"] = num_jobs

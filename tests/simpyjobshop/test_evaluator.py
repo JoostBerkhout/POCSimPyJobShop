@@ -1,7 +1,7 @@
 from pyjobshop import Solution, TaskData
 from simpyjobshop.evaluator import evaluator
-from tests.simheuristics.problems.OneMachineTwoJobs import OneMachineTwoJobs
-from tests.simheuristics.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
+from tests.simpyjobshop.problems.OneMachineTwoJobs import OneMachineTwoJobs
+from tests.simpyjobshop.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
 
 
 def test_evaluator_machine_two_jobs():

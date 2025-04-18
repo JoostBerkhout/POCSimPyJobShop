@@ -43,7 +43,7 @@ class OneMachineTenJobs(Problem):
         machine = model.add_machine()
 
         # Add modes to the model
-        for task, duration in zip(tasks, durations):
+        for task, duration in zip(tasks, durations, strict=True):
             model.add_mode(task, machine, duration=duration)
 
         # Add sequence-dependent setup times
