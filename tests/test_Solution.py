@@ -1,3 +1,6 @@
+import json
+
+import pytest
 from numpy.testing import assert_, assert_equal
 
 from pyjobshop.Solution import Solution, TaskData
@@ -33,3 +36,54 @@ def test_solution_makespan():
     sol = Solution(tasks)
 
     assert_equal(sol.makespan, 100)
+
+
+@pytest.fixture
+def sample_solution():
+    """
+    Fixture to create a sample solution for testing.
+    """
+    tasks = [
+        TaskData(mode=1, resources=[1, 2], start=0, end=10),
+        TaskData(mode=2, resources=[2, 3], start=10, end=20),
+    ]
+    return Solution(tasks)
+
+
+def test_to_dict(sample_solution):
+    """
+    Tests the conversion of a solution to a dictionary representation.
+    """
+    expected = {
+        "tasks": [
+            {"mode": 1, "resources": [1, 2], "start": 0, "end": 10},
+            {"mode": 2, "resources": [2, 3], "start": 10, "end": 20},
+        ],
+    }
+    assert sample_solution.to_dict() == expected
+
+
+def test_to_json_str(sample_solution):
+    """
+    Tests the conversion of a solution to a JSON string representation.
+    """
+    json_str = sample_solution.to_json_str()
+    loaded = json.loads(json_str)
+    expected = {
+        "tasks": [
+            {"mode": 1, "resources": [1, 2], "start": 0, "end": 10},
+            {"mode": 2, "resources": [2, 3], "start": 10, "end": 20},
+        ],
+    }
+    assert loaded == expected
+
+
+def test_from_json_str_roundtrip(sample_solution):
+    """
+    Tests the roundtrip conversion of a solution to and from JSON string repr.
+    """
+    json_str = sample_solution.to_json_str()
+    restored_solution = Solution.from_json_str(json_str)
+
+    assert isinstance(restored_solution, Solution)
+    assert restored_solution == sample_solution

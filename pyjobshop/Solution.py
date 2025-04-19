@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 
 
@@ -53,3 +54,34 @@ class Solution:
         Returns the makespan of the solution.
         """
         return max(task.end for task in self.tasks)
+
+    def to_dict(self) -> dict:
+        """
+        Converts the solution to a dictionary representation.
+        """
+        return {
+            "tasks": [
+                {
+                    "mode": task.mode,
+                    "resources": task.resources,
+                    "start": task.start,
+                    "end": task.end,
+                }
+                for task in self.tasks
+            ],
+        }
+
+    def to_json_str(self) -> str:
+        """
+        Converts the solution to a JSON string representation.
+        """
+        return json.dumps(self.to_dict())
+
+    @classmethod
+    def from_json_str(cls, json_str: str) -> "Solution":
+        """
+        Creates a Solution instance from a JSON string representation.
+        """
+        data = json.loads(json_str)
+        tasks = [TaskData(**t) for t in data["tasks"]]
+        return Solution(tasks)
