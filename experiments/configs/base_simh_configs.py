@@ -21,7 +21,7 @@ dyn_simh_config: DynamicSimheuristicConfig = {
     "score_finding_new_elite": 1,
     "score_finding_new_best": 2,
     "init_score": 1,
-    "max_time_per_cp_solve": 60,
+    "max_time_per_cp_solve": 30,
     "consider_mean": True,
     "quantiles": [0.5, 0.6, 0.7],
     "frac_budget_before_sims": 10 / exp_config["time_limit"],
