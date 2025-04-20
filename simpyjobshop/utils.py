@@ -2,8 +2,11 @@ import csv
 from typing import Dict
 
 import wandb
+from matplotlib import pyplot as plt
 
 from pyjobshop import Solution
+from pyjobshop.plot import plot_machine_gantt
+from simpyjobshop.problems.Problem import Problem
 
 
 def find_schedule_per_resource(solution: Solution) -> Dict[int, list[int]]:
@@ -101,3 +104,14 @@ def init_wandb(
         reinit=True,
         job_type=job_name,
     )
+
+
+def plot_gantt_chart(solution: Solution, problem: Problem):
+    """
+    Plots a Gantt chart of the solution.
+    """
+    data_generator = problem.build_data_generator()
+    data = data_generator.int_mean()
+    model = problem.concrete_model(data)  # data used is irrelevant
+    plot_machine_gantt(solution, model.data())
+    plt.show()

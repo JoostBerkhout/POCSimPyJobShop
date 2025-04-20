@@ -88,6 +88,7 @@ def run_experiment(
         "DCOP_objective": elite.objective,
         "callback_log": callback.get_log_str(),
         "solve status": last_CP_results.status,
+        "solution": elite.solution.to_json_str(),
     }
     exp_run_results.update(durations)
 
