@@ -88,8 +88,9 @@ def standard_simheuristic(
     time_spent = time.time() - start_time_exp
     durations["solver_phase_dur"] = time_spent
 
-    # Simulate the elite solutions for the remaining time
-    callback.solutions.simulate_to_time_limit(time_limit - time_spent)
+    # Final simulation of the elite solutions for the remaining time
+    rem_time_final_sims = min(time_final_sims, time_limit - time_spent)
+    callback.solutions.simulate_to_time_limit(rem_time_final_sims)
 
     # Log times
     exp_duration = time.time() - start_time_exp

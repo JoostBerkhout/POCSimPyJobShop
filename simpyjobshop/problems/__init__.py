@@ -1,3 +1,4 @@
+from .FlexibleJobShop import FlexibleJobShop
 from .HybridFlowShop import HybridFlowShop
 from .ParallelMachineProblem import ParallelMachineProblem
 from .SingleMachineProblem import SingleMachineProblem

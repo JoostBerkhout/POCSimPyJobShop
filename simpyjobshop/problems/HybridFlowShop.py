@@ -110,7 +110,7 @@ class HybridFlowShop(Problem):
                         seed=stage + job * num_stages,
                     )
                 else:
-                    gen = Constant(mean_job_duration)
+                    gen = Constant(loc + mean_job_duration)
                 distributions[f"duration_{job}_on_{stage}"] = gen
 
         # Calculate meaningful due dates
@@ -129,11 +129,10 @@ class HybridFlowShop(Problem):
 
             # Determine finish times of jobs in this stage
             stage_finish_times = [0 for _ in range(num_jobs)]
+            durations = [
+                mean_job_durations[job, stage] + loc for job in range(num_jobs)
+            ]
             for _, schedule in enumerate(machine_schedules):
-                durations = [
-                    mean_job_durations[job, stage] + loc
-                    for job in range(num_jobs)
-                ]
                 first = schedule[0]
                 stage_finish_times[first] = (
                     finish_times_prev_stage[first] + durations[first]

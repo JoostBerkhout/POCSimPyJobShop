@@ -20,6 +20,7 @@ def test_find_solution_for_other_data_one_machine_two_jobs():
     # Find best solution
     result = model.solve(display=False)
     solution = result.best
+    orig_modes = [task.mode for task in solution.tasks]
     schedule = find_schedule_per_resource(solution)[0]
     first = schedule[0]
     second = schedule[1]
@@ -37,8 +38,10 @@ def test_find_solution_for_other_data_one_machine_two_jobs():
     assert obj == 32
     assert new_solution.tasks[first].start == 0
     assert new_solution.tasks[first].end == duration1
+    assert new_solution.tasks[first].mode == orig_modes[first]
     assert new_solution.tasks[second].start == duration1
     assert new_solution.tasks[second].end == duration1 + duration2
+    assert new_solution.tasks[second].mode == orig_modes[second]
 
 
 def test_find_solution_for_other_data_two_machines_two_jobs():
@@ -58,6 +61,7 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     assert result.objective == 1
     solution = result.best
     schedule = find_schedule_per_resource(solution)
+    orig_modes = [task.mode for task in solution.tasks]
 
     # Now change the data and find new solution
     duration1 = 21
@@ -72,8 +76,10 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     assert obj == 21
     assert new_solution.tasks[0].start == 0
     assert new_solution.tasks[0].end == duration1
+    assert new_solution.tasks[0].mode == orig_modes[0]
     assert new_solution.tasks[1].start == 0
     assert new_solution.tasks[1].end == duration2
+    assert new_solution.tasks[1].mode == orig_modes[1]
 
     # Define solution with task 1 -> 2 on second machine
     task1 = TaskData(
@@ -90,6 +96,7 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     )
     solution = Solution(tasks=[task1, task2])
     schedule = find_schedule_per_resource(solution)
+    orig_modes = [task.mode for task in solution.tasks]
 
     # Find solution for changed data
     new_solution, obj = find_solution_for_other_data(solution, problem, data)
@@ -100,8 +107,10 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     assert obj == 32
     assert new_solution.tasks[0].start == 0
     assert new_solution.tasks[0].end == duration1
+    assert new_solution.tasks[0].mode == orig_modes[0]
     assert new_solution.tasks[1].start == duration1
     assert new_solution.tasks[1].end == duration1 + duration2
+    assert new_solution.tasks[1].mode == orig_modes[1]
 
     # Define solution with task 2 -> 1 on second machine
     task1 = TaskData(
@@ -118,6 +127,7 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     )
     solution = Solution(tasks=[task1, task2])
     schedule = find_schedule_per_resource(solution)
+    orig_modes = [task.mode for task in solution.tasks]
 
     # Find solution for changed data
     new_solution, obj = find_solution_for_other_data(solution, problem, data)
@@ -128,5 +138,7 @@ def test_find_solution_for_other_data_two_machines_two_jobs():
     assert obj == 32 + 10
     assert new_solution.tasks[0].start == duration2 + 10
     assert new_solution.tasks[0].end == duration1 + duration2 + 10
+    assert new_solution.tasks[0].mode == orig_modes[0]
     assert new_solution.tasks[1].start == 0
     assert new_solution.tasks[1].end == duration2
+    assert new_solution.tasks[1].mode == orig_modes[1]

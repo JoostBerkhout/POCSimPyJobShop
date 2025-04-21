@@ -12,7 +12,7 @@ def evaluator(
     num_workers: int | None = None,
 ) -> float:
     """
-    Evaluates the solution for the given data.
+    Evaluates the solution's objective value for the given data.
 
     By default, num_workers = 1 since that turned out to be faster than more
     workers in a preliminary experiment, for more details:
