@@ -4,8 +4,7 @@ from simpyjobshop.simheuristics import (
     DynamicSimheuristicConfig,
     SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
-    # deterministic_optimization,
-    dynamic_simheuristic,
+    deterministic_optimization,
 )
 
 # Simheuristic configurations
@@ -23,7 +22,7 @@ dyn_simh_config: DynamicSimheuristicConfig = {
     "init_score": 1,
     "max_time_per_cp_solve": 30,
     "consider_mean": True,
-    "quantiles": [0.5, 0.6, 0.7],
+    "quantiles": [0.6, 0.7, 0.8],
     "frac_budget_before_sims": 10 / exp_config["time_limit"],
     "frac_budget_final_elites_sim": 60 / exp_config["time_limit"],
     # frac_budget_final_elites_sim should be enough to sim. final
@@ -35,7 +34,7 @@ sim_last_config: SimulateLastSolutionsConfig = {
 
 simheuristics: list[SimheuristicSpec] = [
     # SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
-    # SimheuristicSpec("det_opt", deterministic_optimization, {}),
+    SimheuristicSpec("det_opt", deterministic_optimization, {}),
     # SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
-    SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
+    # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
 ]
