@@ -8,7 +8,7 @@ from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
 from simpyjobshop.problems.Problem import Problem
 
 
-class ParallelMachineProblem(Problem):
+class ParallelMachines(Problem):
     """
     Specific implementation of a parallel machine scheduling problem.
     """
@@ -46,7 +46,7 @@ class ParallelMachineProblem(Problem):
 
         # Add modes to the model
         for m, machine in enumerate(machines):
-            for task, duration in zip(tasks, durations[m]):
+            for task, duration in zip(tasks, durations[m], strict=True):
                 model.add_mode(task, machine, duration=duration)
 
         # Add sequence-dependent setup times
@@ -105,7 +105,7 @@ class ParallelMachineProblem(Problem):
             durations = [x + loc for x in mean_job_durations[idx]]
             first = schedule[0]
             finish_times[first] = durations[first]
-            for i, j in zip(schedule[:-1], schedule[1:]):
+            for i, j in zip(schedule[:-1], schedule[1:], strict=True):
                 start_time = finish_times[i] + setup_times[idx, i, j]
                 finish_times[j] = start_time + durations[j]
         due_dates = [int(x) for x in finish_times]
