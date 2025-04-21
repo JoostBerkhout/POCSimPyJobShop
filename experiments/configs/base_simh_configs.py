@@ -5,14 +5,17 @@ from simpyjobshop.simheuristics import (
     SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
     deterministic_optimization,
+    dynamic_simheuristic,
+    simulate_last_solutions,
+    standard_simheuristic,
 )
 
 # Simheuristic configurations
 stand_simh_config: StandardSimheuristicConfig = {
     "num_sims": 25,
     "max_size_elite_set": 5,
-    "frac_budget_before_sims": 0.0,
-    "frac_budget_final_elites_sim": 0.2,
+    "frac_budget_before_sims": 10 / exp_config["time_limit"],
+    "frac_budget_final_elites_sim": 60 / exp_config["time_limit"],
 }
 dyn_simh_config: DynamicSimheuristicConfig = {
     "num_sims": 25,
@@ -33,8 +36,8 @@ sim_last_config: SimulateLastSolutionsConfig = {
 }
 
 simheuristics: list[SimheuristicSpec] = [
-    # SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
+    SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
     SimheuristicSpec("det_opt", deterministic_optimization, {}),
-    # SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
-    # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
+    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
+    SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
 ]
