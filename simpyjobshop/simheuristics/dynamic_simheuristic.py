@@ -24,57 +24,6 @@ class DynamicSimheuristicConfig(TypedDict):
     frac_budget_final_elites_sim: float
 
 
-def parse_model_key(model_key: str) -> float:
-    if "_" in model_key:
-        try:
-            return float(model_key.split("_")[-1])
-        except ValueError:
-            pass  # fallback to default below if conversion fails
-    return 0.0
-
-
-def log_model(
-    callback: SolutionCallback, model_key: str, objective_value: float | None
-):
-    log_data = {
-        "Time (in seconds)": callback.time_spent,
-        "Deterministic model": parse_model_key(model_key),
-    }
-
-    if objective_value is not None:
-        log_data.update(
-            {
-                "Objective new candidate": objective_value,
-            }
-        )
-
-    wandb.log(log_data)
-
-
-def select_weighted_random_key(scores: dict[str, int]) -> str:
-    """
-    Randomly select a key with selection probability proportional to its score.
-
-    Parameters
-    ----------
-    scores : dict[str, int]
-        Dictionary mapping strings to non-negative integer scores. Scores
-        are normalized to form a probability distribution.
-
-    Returns
-    -------
-    str
-        A randomly selected key, weighted by the corresponding score.
-    """
-
-    keys, values = zip(*scores.items(), strict=True)
-    total = sum(values)
-    if total == 0:
-        raise ValueError("Ensure not all scores are zero.")
-    probs = np.array(values) / total
-    return np.random.choice(keys, p=probs)
-
-
 def dynamic_simheuristic(
     problem: Problem,
     simh_config: DynamicSimheuristicConfig,
@@ -168,7 +117,8 @@ def dynamic_simheuristic(
             current_solution, new_obj_val = find_solution_for_other_data(
                 current_solution, problem, data[model_key]
             )
-        log_model(callback, model_key, new_obj_val)
+        if exp_config["use_wandb"]:
+            log_model(callback, model_key, new_obj_val)
 
         # Solve the problem using a callback for stochastic evaluations
         cp_time_limit = min(
@@ -209,6 +159,63 @@ def dynamic_simheuristic(
         wandb.finish()
 
     return callback, result, durations
+
+
+def parse_model_key(model_key: str) -> float:
+    """
+    Helper function to parse the model key to extract a float value.
+    """
+    if "_" in model_key:
+        try:
+            return float(model_key.split("_")[-1])
+        except ValueError:
+            pass  # fallback to default below if conversion fails
+    return 0.0
+
+
+def log_model(
+    callback: SolutionCallback, model_key: str, objective_value: float | None
+):
+    """
+    Log the used model and the objective of a current solution in this model.
+    """
+    log_data = {
+        "Time (in seconds)": callback.time_spent,
+        "Deterministic model": parse_model_key(model_key),
+    }
+
+    if objective_value is not None:
+        log_data.update(
+            {
+                "Objective new candidate": objective_value,
+            }
+        )
+
+    wandb.log(log_data)
+
+
+def select_weighted_random_key(scores: dict[str, int]) -> str:
+    """
+    Randomly select a key with selection probability proportional to its score.
+
+    Parameters
+    ----------
+    scores : dict[str, int]
+        Dictionary mapping strings to non-negative integer scores. Scores
+        are normalized to form a probability distribution.
+
+    Returns
+    -------
+    str
+        A randomly selected key, weighted by the corresponding score.
+    """
+
+    keys, values = zip(*scores.items(), strict=True)
+    total = sum(values)
+    if total == 0:
+        raise ValueError("Ensure not all scores are zero.")
+    probs = np.array(values) / total
+    return np.random.choice(keys, p=probs)
 
 
 def update_scores(
