@@ -93,7 +93,7 @@ class FlexibleJobShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 20
+        num_jobs = 30
         num_tasks = 5
         num_machines = 5
         loc = 1
@@ -103,7 +103,7 @@ class FlexibleJobShop(Problem):
         # Set job distributions
         np.random.seed(seed)  # for reproducibility
         gen: DiscreteRV
-        machine_schedules = [MachineSchedule() for i in range(num_machines)]
+        machine_schedules = [MachineSchedule() for _ in range(num_machines)]
         for job in range(num_jobs):
             prev_task_end = 0
             for task in range(num_tasks):
@@ -127,7 +127,7 @@ class FlexibleJobShop(Problem):
                     task_dur_key = f"dur_{job}_{task}_on_{machine}"
                     if task_dur_key not in distributions:
                         continue  # machine not available for this task
-                    task_dur = distributions[task_dur_key].mean()
+                    task_dur = int(distributions[task_dur_key].mean())
                     start_time = machine_schedules[machine].find_earliest_slot(
                         prev_task_end,
                         task_dur,

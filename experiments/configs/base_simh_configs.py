@@ -32,7 +32,7 @@ dyn_simh_config: DynamicSimheuristicConfig = {
 }
 sim_last_config: SimulateLastSolutionsConfig = {
     "max_size_elite_set": 5,
-    "frac_budget_final_elites_sim": 60 / exp_config["time_limit"],
+    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
 }
 
 simheuristics: list[SimheuristicSpec] = [

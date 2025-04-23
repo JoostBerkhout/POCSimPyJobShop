@@ -16,20 +16,20 @@ class MachineSchedule:
         """Initialize an empty machine schedule."""
         self.timeline = []  # List of (start, end) tuples
 
-    def find_earliest_slot(self, earliest_ready, duration):
+    def find_earliest_slot(self, earliest_ready: int, duration: int) -> int:
         """
         Find the earliest available time slot on this machine for a task.
 
         Parameters
         ----------
-        earliest_ready : int or float
+        earliest_ready : int
             The earliest time the task is allowed to start.
-        duration : int or float
+        duration : int
             The duration of the task to schedule.
 
         Returns
         -------
-        int or float
+        int
             The earliest start time of the task on this machine.
         """
         if not self.timeline:
@@ -46,15 +46,15 @@ class MachineSchedule:
 
         return max(self.timeline[-1][1], earliest_ready)
 
-    def add_task(self, start, end):
+    def add_task(self, start: int, end: int):
         """
         Add a task to the machine schedule.
 
         Parameters
         ----------
-        start : int or float
+        start : int
             Start time of the task.
-        end : int or float
+        end : int
             End time of the task (exclusive).
         """
         bisect.insort(self.timeline, (start, end))
