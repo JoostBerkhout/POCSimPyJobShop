@@ -8,6 +8,7 @@ from simpyjobshop.DiscreteRV import (
     DiscreteRV,
     SeededPoisson,
 )
+from simpyjobshop.problems.MachineSchedule import MachineSchedule
 from simpyjobshop.problems.Problem import Problem
 
 
@@ -23,6 +24,9 @@ class FlexibleJobShop(Problem):
         num_jobs = data["num_jobs"]
         num_tasks = data["num_tasks"]
         num_machines = data["num_machines"]
+        due_dates = [
+            data[f"due_date_{job_idx}"] for job_idx in range(num_jobs)
+        ]
         durations = []
         for job_idx in range(num_jobs):
             job_tasks = []
@@ -55,7 +59,10 @@ class FlexibleJobShop(Problem):
         tasks = {}
 
         for job_idx, job_data in enumerate(durations):
-            job = model.add_job(name=f"Job {job_idx}")
+            job = model.add_job(
+                name=f"Job {job_idx}",
+                due_date=due_dates[job_idx],
+            )
             jobs[job_idx] = job
 
             for idx in range(len(job_data)):
@@ -86,7 +93,7 @@ class FlexibleJobShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 40
+        num_jobs = 20
         num_tasks = 5
         num_machines = 5
         loc = 1
@@ -96,7 +103,9 @@ class FlexibleJobShop(Problem):
         # Set job distributions
         np.random.seed(seed)  # for reproducibility
         gen: DiscreteRV
+        machine_schedules = [MachineSchedule() for i in range(num_machines)]
         for job in range(num_jobs):
+            prev_task_end = 0
             for task in range(num_tasks):
                 for machine in range(num_machines):
                     mean_job_duration = np.random.randint(max_rand_mean)
@@ -110,6 +119,29 @@ class FlexibleJobShop(Problem):
                         gen = Constant(loc + mean_job_duration)
                     distributions[f"dur_{job}_{task}_on_{machine}"] = gen
 
+                # Schedule task on earliest available machine for due date
+                best_start = int("inf")
+                best_end = int("inf")
+                best_machine = int("inf")
+                for machine in range(num_machines):
+                    task_dur_key = f"dur_{job}_{task}_on_{machine}"
+                    if task_dur_key not in distributions:
+                        continue  # machine not available for this task
+                    task_dur = distributions[task_dur_key].mean()
+                    start_time = machine_schedules[machine].find_earliest_slot(
+                        prev_task_end,
+                        task_dur,
+                    )
+                    end_time = start_time + task_dur
+                    if end_time < best_end:
+                        # if start_time < best_start:  # makes it less tight
+                        best_start = start_time
+                        best_end = end_time
+                        best_machine = machine
+                machine_schedules[best_machine].add_task(best_start, best_end)
+                prev_task_end = best_end
+            constants[f"due_date_{job}"] = int(prev_task_end)
+
         # store constants
         constants["num_jobs"] = num_jobs
         constants["num_tasks"] = num_tasks
@@ -119,7 +151,7 @@ class FlexibleJobShop(Problem):
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0
-        constants["weight_total_tardiness"] = 0
+        constants["weight_total_tardiness"] = 100
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
         constants["weight_max_lateness"] = 0
