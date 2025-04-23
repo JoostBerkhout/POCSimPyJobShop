@@ -120,9 +120,9 @@ class FlexibleJobShop(Problem):
                     distributions[f"dur_{job}_{task}_on_{machine}"] = gen
 
                 # Schedule task on earliest available machine for due date
-                best_start = int("inf")
-                best_end = int("inf")
-                best_machine = int("inf")
+                best_start = 10**18
+                best_end = 10**18
+                best_machine = 10**18
                 for machine in range(num_machines):
                     task_dur_key = f"dur_{job}_{task}_on_{machine}"
                     if task_dur_key not in distributions:
