@@ -1,6 +1,6 @@
 from typing import Dict
 
-from pyjobshop import Model, Solution
+from pyjobshop import Model, Result, Solution
 from simpyjobshop.problems.Problem import Problem
 from simpyjobshop.utils import find_schedule_per_resource
 
@@ -70,15 +70,54 @@ def find_solution_for_other_data(
     # d-krupke.github.io/cpsat-primer/05_parameters.html#parallelization
     """
 
+    result = find_result_for_other_data(solution, problem, data, num_workers)
+
+    return result.best, result.objective
+
+
+def find_result_for_other_data(
+    solution: Solution,
+    problem: Problem,
+    data: Dict[str, int],
+    num_workers: int | None = None,
+) -> Result:
+    """
+    Fixes the given solution in a model with the given data for the problem.
+    It then solves the problem and returns the result.
+
+    By default, num_workers = 1 since that turned out to be faster than more
+    workers in a preliminary experiment, for more details:
+    # d-krupke.github.io/cpsat-primer/05_parameters.html#parallelization
+    """
+
     model = problem.concrete_model(data)
     model = fix_solution(solution, model)
     num_workers = 1 if num_workers is None else num_workers
-    results = model.solve(display=False, num_workers=num_workers)
-    new_solution = results.best
-    new_obj_val = results.objective
+    result = model.solve(display=False, num_workers=num_workers)
 
     # Reset mode choices to original mode indices
-    for task in new_solution.tasks:
+    for task in result.best.tasks:
         task.mode = model._map_to_old_mode[task.mode]
 
-    return new_solution, new_obj_val
+    return result
+
+
+def find_result_for_expected_data(
+    solution: Solution,
+    problem: Problem,
+    num_workers: int | None = None,
+) -> Result:
+    """
+    Fixes the given solution in a concrete model with expected data.
+    It then solves the problem and returns the result.
+
+    By default, num_workers = 1 since that turned out to be faster than more
+    workers in a preliminary experiment, for more details:
+    # d-krupke.github.io/cpsat-primer/05_parameters.html#parallelization
+    """
+
+    data_generator = problem.build_data_generator()
+    data = data_generator.int_mean()
+    result = find_result_for_other_data(solution, problem, data, num_workers)
+
+    return result

@@ -1,6 +1,7 @@
 from typing import Any, Type
 
 from experiments.SimheuristicSpec import SimheuristicSpec
+from simpyjobshop.modeling import find_result_for_expected_data
 from simpyjobshop.problems.Problem import Problem
 
 
@@ -76,6 +77,9 @@ def run_experiment(
     )
     elite.simulator.simulate(num_sims=extra_num_sims)
 
+    # Find results for elite with expected data
+    exp_data_result = find_result_for_expected_data(elite.solution, problem)
+
     # Save results
     exp_run_results = {
         "project_name": project_name,
@@ -85,10 +89,10 @@ def run_experiment(
         "mean": elite.simulator.mean,
         "std": elite.simulator.variance**0.5,
         "num_sims": elite.simulator.num_sims,
-        "DCOP_objective": elite.objective,
+        "DCOP_objective": exp_data_result.objective,
+        "DCOP_solution": exp_data_result.best.to_json_str(),
         "callback_log": callback.get_log_str(),
         "solve status": last_CP_results.status,
-        "solution": elite.solution.to_json_str(),
     }
     exp_run_results.update(durations)
 
