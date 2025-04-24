@@ -68,7 +68,7 @@ class OpenShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 120
+        num_jobs = 40
         num_machines = 5
         loc = 1
         max_rand_mean = 15
