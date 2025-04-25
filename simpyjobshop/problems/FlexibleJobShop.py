@@ -37,7 +37,6 @@ class FlexibleJobShop(Problem):
                 ]
                 job_tasks.append(task_durations)
             durations.append(job_tasks)
-
         objective_weights = {
             "weight_makespan": data["weight_makespan"],
             "weight_tardy_jobs": data["weight_tardy_jobs"],
@@ -55,31 +54,31 @@ class FlexibleJobShop(Problem):
             for idx in range(num_machines)
         ]
 
-        jobs = {}
+        # Create the jobs
         tasks = {}
-
         for job_idx, job_data in enumerate(durations):
             job = model.add_job(
                 name=f"Job {job_idx}",
                 due_date=due_dates[job_idx],
             )
-            jobs[job_idx] = job
 
-            for idx in range(len(job_data)):
-                task_tup = (job_idx, idx)
+            # Create all job's tasks
+            for task_idx in range(len(job_data)):
+                task_tup = (job_idx, task_idx)
                 tasks[task_tup] = model.add_task(job, name=f"Task {task_tup}")
 
         for job_idx, job_data in enumerate(durations):
-            for idx, task_data in enumerate(job_data):
-                task = tasks[(job_idx, idx)]
-
+            # Add modes for all job's tasks
+            for task_idx, task_data in enumerate(job_data):
+                task = tasks[(job_idx, task_idx)]
                 for duration, machine_idx in task_data:
                     machine = machines[machine_idx]
                     model.add_mode(task, machine, duration)
 
-            for idx in range(len(job_data) - 1):
-                first = tasks[(job_idx, idx)]
-                second = tasks[(job_idx, idx + 1)]
+            # Add precedence constraints between job's tasks
+            for task_idx in range(len(job_data) - 1):
+                first = tasks[(job_idx, task_idx)]
+                second = tasks[(job_idx, task_idx + 1)]
                 model.add_end_before_start(first, second)
 
         # Set objective

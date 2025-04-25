@@ -4,7 +4,7 @@ from typing import Any, Dict, Tuple
 import numpy as np
 
 from pyjobshop import Model
-from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
+from simpyjobshop.DiscreteRV import Constant, DiscreteRV, SeededPoisson
 from simpyjobshop.problems.Problem import Problem
 
 
@@ -76,19 +76,28 @@ class ParallelMachines(Problem):
         num_jobs = 40
         num_machines = 4
         loc = 1
-        max_rand_mean = 10
+        max_rand_mean = 15
         max_setup_time = 10
+        prob_random_duration = 0.3
 
         # job durations
         np.random.seed(seed)  # for reproducibility
         mean_job_durations: list[list[int]] = []
+        gen: DiscreteRV
         for m in range(num_machines):
             mean_job_durations.append([])
             for i in range(num_jobs):
                 mean_job_duration = np.random.randint(max_rand_mean)
                 mean_job_durations[-1].append(mean_job_duration)
-                seed = i + m * num_jobs
-                gen = SeededPoisson(lam=mean_job_duration, loc=loc, seed=seed)
+                if np.random.rand() < prob_random_duration:
+                    seed = i + m * num_jobs
+                    gen = SeededPoisson(
+                        lam=mean_job_duration,
+                        loc=loc,
+                        seed=seed,
+                    )
+                else:
+                    gen = Constant(loc + mean_job_duration)
                 distributions[f"duration_{i}_on_{m}"] = gen
 
         # setup times
