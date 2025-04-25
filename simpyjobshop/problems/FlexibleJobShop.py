@@ -92,7 +92,7 @@ class FlexibleJobShop(Problem):
         distributions: Dict[str, DiscreteRV] = {}
         constants: Dict[str, int] = {}
 
-        num_jobs = 30
+        num_jobs = 35
         num_tasks = 5
         num_machines = 5
         loc = 1
