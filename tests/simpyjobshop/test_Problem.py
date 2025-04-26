@@ -1,4 +1,4 @@
-from simpyjobshop.problems.SingleMachineProblem import (
+from tests.simpyjobshop.problems.SingleMachineProblem import (
     SingleMachineProblem,
 )
 

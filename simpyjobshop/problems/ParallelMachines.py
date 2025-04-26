@@ -90,11 +90,11 @@ class ParallelMachines(Problem):
                 mean_job_duration = np.random.randint(max_rand_mean)
                 mean_job_durations[-1].append(mean_job_duration)
                 if np.random.rand() < prob_random_duration:
-                    seed = i + m * num_jobs
+                    dur_seed = i + m * num_jobs
                     gen = SeededPoisson(
                         lam=mean_job_duration,
                         loc=loc,
-                        seed=seed,
+                        seed=dur_seed,
                     )
                 else:
                     gen = Constant(loc + mean_job_duration)

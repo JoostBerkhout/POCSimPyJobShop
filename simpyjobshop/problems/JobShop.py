@@ -120,7 +120,6 @@ class JobShop(Problem):
                 machine_schedules[machine].add_task(start_time, end_time)
                 prev_task_end = end_time
             constants[f"due_date_{job}"] = prev_task_end
-            print(constants[f"due_date_{job}"])
 
         # store constants
         constants["num_jobs"] = num_jobs
