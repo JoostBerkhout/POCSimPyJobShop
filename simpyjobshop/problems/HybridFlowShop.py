@@ -93,7 +93,7 @@ class HybridFlowShop(Problem):
         num_machines = [4, 5, 4]
         loc = 1
         max_rand_mean = 15
-        prob_random_duration = 0.3
+        prob_random_duration = 1.0
 
         # Job durations
         np.random.seed(seed)  # for reproducibility
