@@ -150,7 +150,7 @@ class FlexibleJobShop(Problem):
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0
-        constants["weight_total_tardiness"] = 100
+        constants["weight_total_tardiness"] = 0
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
         constants["weight_max_lateness"] = 0
