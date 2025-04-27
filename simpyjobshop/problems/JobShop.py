@@ -98,7 +98,7 @@ class JobShop(Problem):
             prev_task_end = 0
             for task in range(num_tasks):
                 machine = np.random.choice(num_machines)
-                mean_job_duration = np.random.randint(max_rand_mean)
+                mean_job_duration = np.random.randint(1, max_rand_mean + 1)
                 if np.random.rand() < prob_random_duration:
                     gen = SeededPoisson(
                         lam=mean_job_duration,

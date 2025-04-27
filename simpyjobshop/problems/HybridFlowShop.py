@@ -101,7 +101,7 @@ class HybridFlowShop(Problem):
         gen: DiscreteRV
         for job in range(num_jobs):
             for stage in range(num_stages):
-                mean_job_duration = np.random.randint(max_rand_mean)
+                mean_job_duration = np.random.randint(1, max_rand_mean + 1)
                 mean_job_durations[job, stage] = mean_job_duration
                 if np.random.rand() < prob_random_duration:
                     gen = SeededPoisson(

@@ -87,7 +87,7 @@ class ParallelMachines(Problem):
         for m in range(num_machines):
             mean_job_durations.append([])
             for i in range(num_jobs):
-                mean_job_duration = np.random.randint(max_rand_mean)
+                mean_job_duration = np.random.randint(1, max_rand_mean + 1)
                 mean_job_durations[-1].append(mean_job_duration)
                 if np.random.rand() < prob_random_duration:
                     dur_seed = i + m * num_jobs
