@@ -97,7 +97,7 @@ class FlexibleJobShop(Problem):
         num_machines = 5
         loc = 1
         max_rand_mean = 15
-        prob_random_duration = 1.0
+        prob_random_duration = 0.3
 
         # Set job distributions
         np.random.seed(seed)  # for reproducibility

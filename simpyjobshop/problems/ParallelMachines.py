@@ -78,7 +78,7 @@ class ParallelMachines(Problem):
         loc = 1
         max_rand_mean = 15
         max_setup_time = 10
-        prob_random_duration = 1.0
+        prob_random_duration = 0.3
 
         # job durations
         np.random.seed(seed)  # for reproducibility
