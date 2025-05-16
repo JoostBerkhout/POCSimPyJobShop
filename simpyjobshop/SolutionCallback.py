@@ -104,6 +104,7 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                 if self.simulation_started:
                     self._log_event("Simulation started.")
                     simulator.simulate(self.num_sims)
+                    self._log_event("Simulation ended.")
                 else:
                     self._log_event(
                         f"Simulation skipped: not yet allowed. Start time "
@@ -121,7 +122,13 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                     },
                 )
 
-                self._log_to_wandb(simulator)
+                if self.simulation_started:
+                    self._log_event("Ensure all solutions are simulated.")
+                    self.solutions.simulate_to_num_sims(self.num_sims)
+                    self._log_event("Simulation ended.")
+
+                if wandb.run is not None:
+                    self._log_to_wandb(simulator)
 
                 if self.max_size_elite_set is not None:
                     self.solutions.keep_top_n(self.max_size_elite_set)
@@ -142,9 +149,6 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
     def _log_to_wandb(self, simulator: Simulator):
         # Logs relevant metrics to Weights & Biases.
 
-        if wandb.run is None:
-            return
-
         log_data = {
             "Time (in seconds)": self.time_spent,
             "Objective new candidate": self.objective_value,
@@ -152,12 +156,6 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         }
 
         if self.simulation_started:
-            self._log_event(
-                f"wandb log: Starting to simulate. "
-                f"all_simulated = {self.solutions.all_simulated()}"
-            )
-            self.solutions.simulate_to_num_sims(self.num_sims)
-            self._log_event("wandb log: Simulation ended.")
             best_elite = self.solutions.get_best_mean_solution()
             log_data.update(
                 {

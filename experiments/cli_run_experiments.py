@@ -51,7 +51,7 @@ def main(problem: str, problem_cls: Type[Problem]):
         unit="experiment_run",
     )
 
-    # load as pandas df
+    # Load as pandas df
     df = pd.DataFrame(results)
     results_dir = Path(__file__).resolve().parent / "results"
     df.to_csv(results_dir / f"{project_name}.csv", index=False)

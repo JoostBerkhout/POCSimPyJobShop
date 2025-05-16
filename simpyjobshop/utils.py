@@ -106,12 +106,12 @@ def init_wandb(
     )
 
 
-def plot_gantt_chart(solution: Solution, problem: Problem):
+def plot_gantt_chart(solution: Solution, problem: Problem, title: str = ""):
     """
     Plots a Gantt chart of the solution.
     """
     data_generator = problem.build_data_generator()
     data = data_generator.int_mean()
     model = problem.concrete_model(data)  # data used is irrelevant
-    plot_machine_gantt(solution, model.data())
+    plot_machine_gantt(solution, model.data(), title=title)
     plt.show()

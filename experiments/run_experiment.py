@@ -1,6 +1,6 @@
 from typing import Any, Type
 
-from experiments.SimheuristicSpec import SimheuristicSpec
+from experiments.utils.SimheuristicSpec import SimheuristicSpec
 from simpyjobshop.modeling import find_result_for_expected_data
 from simpyjobshop.problems.Problem import Problem
 

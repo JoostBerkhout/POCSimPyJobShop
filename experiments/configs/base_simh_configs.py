@@ -1,5 +1,5 @@
 from experiments.configs.base_exp_config import exp_config
-from experiments.SimheuristicSpec import SimheuristicSpec
+from experiments.utils.SimheuristicSpec import SimheuristicSpec
 from simpyjobshop.simheuristics import (
     DynamicSimheuristicConfig,
     SimulateLastSolutionsConfig,
@@ -36,8 +36,8 @@ sim_last_config: SimulateLastSolutionsConfig = {
 }
 
 simheuristics: list[SimheuristicSpec] = [
-    SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
     SimheuristicSpec("det_opt", deterministic_optimization, {}),
     SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
+    SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
     SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
 ]
