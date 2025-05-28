@@ -26,7 +26,7 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         None, the current time is used.
     start_time_sims : float, optional
         Time after which simulation of solutions is allowed. If None,
-        simulations are triggered automatically.
+        simulations triggered directly.
     max_size_elite_set : int, optional
         Maximum number of elite solutions to retain. If None, all unique
         solutions are kept.

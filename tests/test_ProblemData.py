@@ -1357,3 +1357,38 @@ def test_combined_objective(solver: str):
     # The objective value is 10 * 6 + 2 * 2 = 64.
     assert_equal(result.objective, 64)
     assert_equal(result.status.value, "Optimal")
+
+
+def test_objective_bound():
+    """
+    Tests that setting an objective bound changes the optimization focus.
+    """
+
+    model = Model()
+
+    machine = model.add_machine()
+    durations = [2, 4]
+
+    for idx in range(2):
+        job = model.add_job()
+        task = model.add_task(job=job)
+        model.add_mode(task, machine, durations[idx])
+
+    model.set_objective(weight_total_flow_time=1)
+    model.set_objective_bound(8)
+    result = model.solve(display=False)
+
+    # Check whether it finds the only feasible solution with objective 8.
+    assert_equal(result.best.tasks[0].start, 0)
+    assert_equal(result.best.tasks[0].end, 2)
+    assert_equal(result.best.tasks[1].start, 2)
+    assert_equal(result.best.tasks[1].end, 6)
+    assert_equal(result.objective, 0)  # No optimization -> value 0
+    assert_equal(result.status.value, "Optimal")
+
+    # Make the model infeasible.
+    model.set_objective_bound(7)
+    result = model.solve(display=False)
+
+    # Check for infeasibility.
+    assert_equal(result.status.value, "Infeasible")

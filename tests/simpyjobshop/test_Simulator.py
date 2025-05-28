@@ -7,7 +7,7 @@ from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
 
 def test_simulator():
     """
-    Tests whether solving a one-machine problem with two jobs works.
+    Tests whether solving a one-machine problem with ten jobs works.
     """
 
     # Create a model

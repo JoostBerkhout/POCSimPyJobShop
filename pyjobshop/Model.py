@@ -37,6 +37,7 @@ class Model:
         self._setup_times: dict[tuple[int, int, int], int] = {}
         self._horizon: int = MAX_VALUE
         self._objective: Objective = Objective.makespan()
+        self._objective_bound: int | None = None
 
         self._id2job: dict[int, int] = {}
         self._id2resource: dict[int, int] = {}
@@ -78,6 +79,13 @@ class Model:
         Returns the objective function in this model.
         """
         return self._objective
+
+    @property
+    def objective_bound(self) -> int | None:
+        """
+        Returns the objective bound in this model.
+        """
+        return self._objective_bound
 
     @classmethod
     def from_data(cls, data: ProblemData):
@@ -203,6 +211,7 @@ class Model:
             setup_times=setup,
             horizon=self._horizon,
             objective=self._objective,
+            objective_bound=self._objective_bound,
         )
 
     def add_job(
@@ -551,6 +560,13 @@ class Model:
             weight_max_tardiness=weight_max_tardiness,
             weight_max_lateness=weight_max_lateness,
         )
+
+    def set_objective_bound(self, bound: int):
+        """
+        Sets an upper bound for the objective. The solver finds a solution
+        meeting or beating this value, instead of minimizing.
+        """
+        self._objective_bound = bound
 
     def solve(
         self,

@@ -312,6 +312,22 @@ def test_model_set_objective():
     assert_equal(model.objective.weight_max_lateness, 7)
 
 
+def test_model_set_objective_bound():
+    """
+    Test setting an objective bound.
+    """
+
+    model = Model()
+
+    # The default objective bound is None.
+    assert_equal(model.objective_bound, None)
+
+    # Now we set the objective bound.
+    model.set_objective_bound(1)
+
+    assert_equal(model.objective_bound, 1)
+
+
 def test_solve(solver: str):
     """
     Tests the solve method of the Model class.
@@ -322,7 +338,7 @@ def test_solve(solver: str):
     machine = model.add_machine()
     tasks = [model.add_task(job=job) for _ in range(2)]
 
-    for task, duration in zip(tasks, [1, 2]):
+    for task, duration in zip(tasks, [1, 2], strict=True):
         model.add_mode(task, machine, duration)
 
     result = model.solve(solver=solver)

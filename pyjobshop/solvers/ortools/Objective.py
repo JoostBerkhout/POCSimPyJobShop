@@ -41,7 +41,7 @@ class Objective:
         model, data = self._model, self._data
         is_tardy_vars = []
 
-        for job, job_var in zip(data.jobs, self._job_vars):
+        for job, job_var in zip(data.jobs, self._job_vars, strict=True):
             assert job.due_date is not None
             is_tardy = model.new_bool_var(f"is_tardy_{job}")
             model.add(job_var.end > job.due_date).only_enforce_if(is_tardy)
@@ -58,7 +58,7 @@ class Objective:
         model, data = self._model, self._data
         flow_time_vars = []
 
-        for job, var in zip(data.jobs, self._job_vars):
+        for job, var in zip(data.jobs, self._job_vars, strict=True):
             flow_time = model.new_int_var(0, data.horizon, f"flow_time_{job}")
             model.add_max_equality(flow_time, [0, var.end - job.release_date])
             flow_time_vars.append(flow_time)
@@ -73,7 +73,7 @@ class Objective:
         model, data = self._model, self._data
         tardiness_vars = []
 
-        for job, var in zip(data.jobs, self._job_vars):
+        for job, var in zip(data.jobs, self._job_vars, strict=True):
             assert job.due_date is not None
             tardiness = model.new_int_var(0, data.horizon, f"tardiness_{job}")
             model.add_max_equality(tardiness, [0, var.end - job.due_date])
@@ -89,7 +89,7 @@ class Objective:
         model, data = self._model, self._data
         earliness_vars = []
 
-        for job, var in zip(data.jobs, self._job_vars):
+        for job, var in zip(data.jobs, self._job_vars, strict=True):
             assert job.due_date is not None
             earliness = model.new_int_var(0, data.horizon, f"earliness_{job}")
             model.add_max_equality(earliness, [0, job.due_date - var.end])
@@ -105,7 +105,7 @@ class Objective:
         model, data = self._model, self._data
         tardiness_vars = []
 
-        for job, var in zip(data.jobs, self._job_vars):
+        for job, var in zip(data.jobs, self._job_vars, strict=True):
             assert job.due_date is not None
             tardiness = model.new_int_var(0, data.horizon, f"tardiness_{job}")
             model.add_max_equality(tardiness, [0, var.end - job.due_date])
@@ -122,7 +122,7 @@ class Objective:
         model, data = self._model, self._data
         lateness_vars = []
 
-        for job, var in zip(data.jobs, self._job_vars):
+        for job, var in zip(data.jobs, self._job_vars, strict=True):
             assert job.due_date is not None
             lateness = model.new_int_var(
                 -data.horizon, data.horizon, f"lateness_{job}"
@@ -160,5 +160,10 @@ class Objective:
             self._model.clear_objective()
 
         obj_expr = self._objective_expr(objective)
-        self._model.minimize(obj_expr)
+        obj_bound = self._data.objective_bound
+        if obj_bound is None:
+            self._model.minimize(obj_expr)
+        else:
+            # hacky: no explicit optimization done, objective is only bounded
+            self._model.add(obj_expr <= obj_bound)
         self._current_obj_expr = obj_expr

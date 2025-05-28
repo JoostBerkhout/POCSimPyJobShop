@@ -509,6 +509,11 @@ class ProblemData:
         The horizon value. Default ``MAX_VALUE``.
     objective
         The objective function. Default is minimizing the makespan.
+    objective_bound
+        A bound on the objective function. If given, the objective is not
+        minimized, instead, the optimization will be a satisfaction problem
+        which tries to find a solution with objective smaller or equal to
+        this bound. Default is None, which means that this bound is ignored.
     """
 
     def __init__(
@@ -521,6 +526,7 @@ class ProblemData:
         setup_times: Optional[np.ndarray] = None,
         horizon: int = MAX_VALUE,
         objective: Optional[Objective] = None,
+        objective_bound: Optional[int] = None,
     ):
         self._jobs = jobs
         self._resources = resources
@@ -532,6 +538,7 @@ class ProblemData:
         self._objective = (
             objective if objective is not None else Objective.makespan()
         )
+        self._objective_bound = objective_bound
 
         self._validate_parameters()
 
@@ -572,7 +579,9 @@ class ProblemData:
             num_modes[mode.task] += 1
             infeasible_modes[mode.task] += any(
                 demand > self.resources[resource].capacity
-                for demand, resource in zip(mode.demands, mode.resources)
+                for demand, resource in zip(
+                    mode.demands, mode.resources, strict=True
+                )
             )
 
         for task, count in num_modes.items():
@@ -732,6 +741,13 @@ class ProblemData:
         The objective function.
         """
         return self._objective
+
+    @property
+    def objective_bound(self) -> int | None:
+        """
+        The upper bound for the objective function.
+        """
+        return self._objective_bound
 
     @property
     def num_jobs(self) -> int:

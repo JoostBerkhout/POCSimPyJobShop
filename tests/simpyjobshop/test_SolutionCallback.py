@@ -2,6 +2,7 @@ import time
 
 from simpyjobshop.SolutionCallback import SolutionCallback
 from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
+from tests.simpyjobshop.problems.OneMachineTwoJobs import OneMachineTwoJobs
 
 
 def test_solution_callback():
@@ -49,11 +50,57 @@ def test_solution_callback():
     )
     start_time = time.time()
     model.solve(
-        callback=callback, display=True, time_limit=time_limit, num_workers=1
+        callback=callback, display=False, time_limit=time_limit, num_workers=1
     )
 
     # Tests whether SolutionCallback stops in time, non are simulated and size
-    assert time.time() - start_time < time_limit + 0.1
+    assert 0 < time.time() - start_time < time_limit + 0.1
     assert callback.solutions.none_simulated()
     assert not callback.solutions.all_simulated()
     assert len(callback.solutions.elite_solutions) == 3
+
+
+def test_solution_callback_finds_all():
+    """
+    Tests to see whether all solutions are found by solution callback.
+    """
+
+    # Create a problem
+    problem = OneMachineTwoJobs()
+    data_generator = problem.build_data_generator()
+    data = data_generator.int_mean()
+    model = problem.concrete_model(data)
+
+    # Find all solutions with makespan <= 12
+    model.set_objective_bound(12)
+    callback = SolutionCallback(problem, num_sims=1)
+    result = model.solve(
+        callback=callback,
+        display=True,
+        num_workers=1,
+        enumerate_all_solutions=True,  # OR-tools will enumerate all solutions
+    )
+
+    # Check if the result is optimal and solution correct
+    assert result.status.value == "Optimal"
+    elites = callback.solutions.elite_solutions
+    assert len(elites) == 2
+    schedules = {tuple(es.schedule[0]) for es in elites.values()}
+    assert schedules == {(0, 1), (1, 0)}
+
+    # Find all solutions with makespan <= 11
+    model.set_objective_bound(11)
+    callback = SolutionCallback(problem, num_sims=1)
+    result = model.solve(
+        callback=callback,
+        display=True,
+        num_workers=1,
+        enumerate_all_solutions=True,  # OR-tools will enumerate all solutions
+    )
+
+    # Check if the result is optimal and solution correct
+    assert result.status.value == "Optimal"
+    elites = callback.solutions.elite_solutions
+    assert len(elites) == 1
+    schedule = {tuple(es.schedule[0]) for es in elites.values()}
+    assert schedule == {(0, 1)}
