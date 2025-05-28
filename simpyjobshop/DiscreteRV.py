@@ -143,3 +143,34 @@ class Constant(DiscreteRV):
 
         # Call the parent class constructor with this custom distribution
         super().__init__(rv_discrete(name="constant", values=(xk, pk)), seed)
+
+
+class CustomRV(DiscreteRV):
+    """
+    A custom discrete random variable with specified values and probabilities.
+    """
+
+    def __init__(
+        self, values: list[int], probs: list[float], seed: int = 0
+    ) -> None:
+        """
+        Initializes the custom random variable.
+
+        Parameters
+        ----------
+        values : list[int]
+            Possible values the random variable can take.
+        probs : list[float]
+            Probabilities for each value (must sum to 1).
+        seed : int, optional
+            Seed for the random number generator.
+        """
+        if len(values) != len(probs):
+            raise ValueError("values and probs must be of the same length.")
+        if min(probs) < 0:
+            raise ValueError("Probabilities must be >= 0.")
+        if not abs(sum(probs) - 1.0) < 1e-10:
+            raise ValueError("Probabilities must sum to 1.")
+
+        dist = rv_discrete(name="custom_rv", values=(values, probs))
+        super().__init__(dist, seed)

@@ -4,6 +4,7 @@ from scipy.stats import poisson
 
 from simpyjobshop.DiscreteRV import (
     Constant,
+    CustomRV,
     DiscreteRV,
     SeededPoisson,
 )
@@ -98,3 +99,55 @@ def test_constant_ppf():
 
     for p in [0.1, 0.5, 0.9, 1.0]:
         assert const_rv.ppf(p) == value
+
+
+def test_custom_rv_valid_distribution():
+    rv = CustomRV([1, 2, 3], [0.2, 0.3, 0.5])
+    sample = rv.rvs(size=10)
+    assert all(x in [1, 2, 3] for x in sample)
+
+
+def test_custom_rv_invalid_length():
+    with pytest.raises(ValueError, match="same length"):
+        CustomRV([1, 2], [0.5])
+
+
+def test_custom_rv_negative_probability():
+    with pytest.raises(ValueError, match=">= 0"):
+        CustomRV([1, 2], [0.6, -0.4])
+
+
+def test_custom_rv_probabilities_not_summing_to_one():
+    with pytest.raises(ValueError, match="sum to 1"):
+        CustomRV([1, 2, 3], [0.3, 0.3, 0.3])
+
+
+def test_custom_rv_sampling_is_deterministic_with_seed():
+    rv1 = CustomRV([10, 20], [0.5, 0.5], seed=123)
+    rv2 = CustomRV([10, 20], [0.5, 0.5], seed=123)
+
+    samples1 = rv1.rvs(size=10)
+    samples2 = rv2.rvs(size=10)
+
+    np.testing.assert_array_equal(samples1, samples2)
+
+
+def test_custom_rv_sampling_with_prob_1():
+    rv = CustomRV([10, 20], [0.0, 1.0], seed=42)
+
+    samples = rv.rvs(size=10)
+
+    assert rv.mean() == 20
+    assert rv.var() == 0
+    assert rv.ppf(0.5) == 20
+    assert rv.ppf(0.9) == 20
+    np.testing.assert_array_equal(samples, np.full(10, 20))
+
+
+def test_custom_rv_sampling_mean():
+    rv = CustomRV([10, 20], [0.5, 0.5], seed=42)
+
+    assert rv.mean() == 15
+    assert rv.ppf(0.49) == 10
+    assert rv.ppf(0.5) == 10
+    assert rv.ppf(0.51) == 20

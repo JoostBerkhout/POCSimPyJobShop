@@ -10,6 +10,7 @@ from simpyjobshop.SolutionCallback import SolutionCallback
 
 
 class SimulateLastSolutionsConfig(TypedDict):
+    det_repr: str | float  # float in (0, 1) for a quantile or str "mean"
     max_size_elite_set: int
     frac_budget_final_elites_sim: float
 
@@ -18,7 +19,6 @@ def simulate_last_solutions(
     problem: Problem,
     simh_config: SimulateLastSolutionsConfig,
     exp_config: dict[str, int],
-    use_wandb: bool = False,
     wandb_config: dict[str, str] | None = None,
 ) -> Tuple[SolutionCallback, Result, dict[str, float]]:
     """
@@ -52,6 +52,7 @@ def simulate_last_solutions(
 
     frac_budget_final_elites_sim = simh_config["frac_budget_final_elites_sim"]
     _simh_config: StandardSimheuristicConfig = {
+        "det_repr": simh_config["det_repr"],
         "num_sims": 0,  # no simulation during optimization
         "max_size_elite_set": simh_config["max_size_elite_set"],
         "frac_budget_before_sims": 1.1,  # no simulation during optimization

@@ -1,6 +1,7 @@
 from experiments.configs.base_exp_config import exp_config
 from experiments.utils.SimheuristicSpec import SimheuristicSpec
 from simpyjobshop.simheuristics import (
+    DeterministicOptimizationConfig,
     DynamicSimheuristicConfig,
     SimulateLastSolutionsConfig,
     StandardSimheuristicConfig,
@@ -11,7 +12,11 @@ from simpyjobshop.simheuristics import (
 )
 
 # Simheuristic configurations
+det_opt_config: DeterministicOptimizationConfig = {
+    "det_repr": "mean",
+}
 stand_simh_config: StandardSimheuristicConfig = {
+    "det_repr": "mean",
     "num_sims": 20,
     "max_size_elite_set": 5,
     "frac_budget_before_sims": 10 / exp_config["time_limit"],
@@ -31,12 +36,13 @@ dyn_simh_config: DynamicSimheuristicConfig = {
     # frac_budget_final_elites_sim should be enough to sim. final
 }
 sim_last_config: SimulateLastSolutionsConfig = {
+    "det_repr": "mean",
     "max_size_elite_set": 5,
     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
 }
 
 simheuristics: list[SimheuristicSpec] = [
-    SimheuristicSpec("det_opt", deterministic_optimization, {}),
+    SimheuristicSpec("det_opt", deterministic_optimization, det_opt_config),
     SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
     SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
     SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),

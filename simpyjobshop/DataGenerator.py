@@ -41,3 +41,20 @@ class DataGenerator:
         """Returns the p-quantile of each parameter's distribution."""
         quant_data = {k: v.ppf(p) for k, v in self.distributions.items()}
         return quant_data | self.constants
+
+    def by_key(self, key: float | str) -> Dict[str, int]:
+        """
+        Returns generated data based on the key:
+        - If key is float between 0 and 1, returns the corresponding quantile.
+        - If key is "mean" (case-insensitive), returns integer means.
+        - Otherwise, raises a ValueError.
+        """
+        if isinstance(key, float) and 0.0 < key < 1.0:
+            return self.quantile(key)
+        elif isinstance(key, str) and key.lower() == "mean":
+            return self.int_mean()
+        else:
+            raise ValueError(
+                f"Invalid key '{key}'. Use a float between 0 and 1 for "
+                f"quantiles or 'mean' for integer means."
+            )

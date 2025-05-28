@@ -10,6 +10,7 @@ from simpyjobshop.utils import init_wandb
 
 
 class StandardSimheuristicConfig(TypedDict):
+    det_repr: float | str  # float in (0, 1) for a quantile or str "mean"
     num_sims: int
     max_size_elite_set: int
     frac_budget_before_sims: float
@@ -58,6 +59,7 @@ def standard_simheuristic(
 
     # Init
     time_limit = exp_config["time_limit"]
+    det_repr = simh_config["det_repr"]
     num_sims = simh_config["num_sims"]
     start_time_sims = simh_config["frac_budget_before_sims"] * time_limit
     max_size_elite_set = simh_config["max_size_elite_set"]
@@ -65,7 +67,7 @@ def standard_simheuristic(
 
     # Generate problem data and build model
     data_generator = problem.build_data_generator()
-    data = data_generator.int_mean()
+    data = data_generator.by_key(det_repr)
     model = problem.concrete_model(data)
 
     # Solve the problem using a callback for stochastic evaluations

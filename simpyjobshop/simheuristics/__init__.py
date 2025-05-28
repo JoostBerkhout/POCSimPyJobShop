@@ -1,4 +1,7 @@
-from .deterministic_optimization import deterministic_optimization
+from .deterministic_optimization import (
+    DeterministicOptimizationConfig,
+    deterministic_optimization,
+)
 from .dynamic_simheuristic import (
     DynamicSimheuristicConfig,
     dynamic_simheuristic,

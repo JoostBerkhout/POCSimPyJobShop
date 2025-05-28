@@ -59,3 +59,41 @@ def test_quantile(data_generator):
     result = data_generator.quantile(0.5)  # Test with p=0.5
     expected = {"param1": 11, "param2": 21, "constant1": 5, "constant2": 15}
     assert result == expected, f"Expected {expected}, but got {result}"
+
+
+def test_by_key_mean(data_generator):
+    result = data_generator.by_key("mean")
+    expected = {"param1": 12, "param2": 22, "constant1": 5, "constant2": 15}
+    assert result == expected, f"Expected {expected}, but got {result}"
+
+
+def test_by_key_quantile(data_generator):
+    result = data_generator.by_key(0.5)  # Test with p=0.5
+    expected = {"param1": 11, "param2": 21, "constant1": 5, "constant2": 15}
+    assert result == expected, f"Expected {expected}, but got {result}"
+
+
+def test_by_key_value_error(data_generator):
+    with pytest.raises(
+        ValueError,
+        match="Invalid key 'invalid_key'. Use a "
+        "float between 0 and 1 for quantiles"
+        " or 'mean' for integer means.",
+    ):
+        data_generator.by_key("invalid_key")
+
+    with pytest.raises(
+        ValueError,
+        match="Invalid key '1.2'. Use a float "
+        "between 0 and 1 for quantiles or "
+        "'mean' for integer means.",
+    ):
+        data_generator.by_key(1.2)
+
+    with pytest.raises(
+        ValueError,
+        match="Invalid key '-0.5'. Use a float "
+        "between 0 and 1 for quantiles or "
+        "'mean' for integer means.",
+    ):
+        data_generator.by_key(-0.5)

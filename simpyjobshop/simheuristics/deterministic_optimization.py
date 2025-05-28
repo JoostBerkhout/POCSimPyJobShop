@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, TypedDict
 
 from pyjobshop import Result
 from simpyjobshop.problems.Problem import Problem
@@ -9,11 +9,14 @@ from simpyjobshop.simheuristics.standard_simheuristic import (
 from simpyjobshop.SolutionCallback import SolutionCallback
 
 
+class DeterministicOptimizationConfig(TypedDict):
+    det_repr: float | str  # float in (0, 1) for a quantile or str "mean"
+
+
 def deterministic_optimization(
     problem: Problem,
-    simh_config: dict,
+    simh_config: DeterministicOptimizationConfig,
     exp_config: dict[str, int],
-    use_wandb: bool = False,
     wandb_config: dict[str, str] | None = None,
 ) -> Tuple[SolutionCallback, Result, dict[str, float]]:
     """
@@ -45,13 +48,12 @@ def deterministic_optimization(
         the loading and closing duration of wandb if used.
     """
 
-    assert len(simh_config) == 0, "simh_config should be empty."
-
     _simh_config: StandardSimheuristicConfig = {
+        "det_repr": simh_config["det_repr"],
         "num_sims": 0,
         "max_size_elite_set": 1,
-        "frac_budget_before_sims": 1.1,
-        "frac_budget_final_elites_sim": 0.0,
+        "frac_budget_before_sims": 1.1,  # no simulation
+        "frac_budget_final_elites_sim": 0.0,  # no simulation
     }
 
     return standard_simheuristic(
