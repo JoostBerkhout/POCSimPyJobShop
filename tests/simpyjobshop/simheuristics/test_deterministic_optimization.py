@@ -34,7 +34,7 @@ def test_det_opt_one_machine():
         exp_config,
     )
 
-    elites = list(callback.solutions.elite_solutions.values())
+    elites = callback.solutions
     assert len(elites) == 1
     assert elites[0].objective == 4
     assert elites[0].schedule[0] == [0, 1]
@@ -49,7 +49,7 @@ def test_det_opt_one_machine():
         exp_config,
     )
 
-    elites = list(callback.solutions.elite_solutions.values())
+    elites = callback.solutions
     assert len(elites) == 1
     assert elites[0].objective == 7
     assert elites[0].schedule[0] == [1, 0]
@@ -64,7 +64,7 @@ def test_det_opt_one_machine():
         exp_config,
     )
 
-    elites = list(callback.solutions.elite_solutions.values())
+    elites = callback.solutions
     assert len(elites) == 1
     assert elites[0].objective == 2
     assert elites[0].schedule[0] == [0, 1]

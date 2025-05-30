@@ -60,7 +60,7 @@ def save_elite_solutions_to_csv(elite_solutions, filename: str):
         writer.writerow(col_headers)
 
         # Iterate over elite solutions and write the data rows
-        for elite_solution in elite_solutions.elite_solutions.values():
+        for elite_solution in elite_solutions:
             writer.writerow(
                 [
                     id(elite_solution.solution),

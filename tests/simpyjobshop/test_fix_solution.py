@@ -252,7 +252,7 @@ def test_fix_callback_solutions():
 
     # Test whether intermediate results are correct
     objective = None
-    for elite_solution in callback.solutions.elite_solutions.values():
+    for elite_solution in callback.solutions:
         solution = elite_solution.solution
         simulator = elite_solution.simulator
         objective = elite_solution.objective

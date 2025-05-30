@@ -57,7 +57,7 @@ def test_solution_callback():
     assert 0 < time.time() - start_time < time_limit + 0.1
     assert callback.solutions.none_simulated()
     assert not callback.solutions.all_simulated()
-    assert len(callback.solutions.elite_solutions) == 3
+    assert len(callback.solutions) == 3
 
 
 def test_solution_callback_finds_all():
@@ -83,9 +83,9 @@ def test_solution_callback_finds_all():
 
     # Check if the result is optimal and solution correct
     assert result.status.value == "Optimal"
-    elites = callback.solutions.elite_solutions
+    elites = callback.solutions
     assert len(elites) == 2
-    schedules = {tuple(es.schedule[0]) for es in elites.values()}
+    schedules = {tuple(es.schedule[0]) for es in elites}
     assert schedules == {(0, 1), (1, 0)}
 
     # Find all solutions with makespan <= 11
@@ -100,7 +100,7 @@ def test_solution_callback_finds_all():
 
     # Check if the result is optimal and solution correct
     assert result.status.value == "Optimal"
-    elites = callback.solutions.elite_solutions
+    elites = callback.solutions
     assert len(elites) == 1
-    schedule = {tuple(es.schedule[0]) for es in elites.values()}
-    assert schedule == {(0, 1)}
+    schedule = elites[0].schedule[0]
+    assert schedule == [0, 1]

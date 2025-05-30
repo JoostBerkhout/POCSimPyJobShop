@@ -4,7 +4,7 @@ import wandb
 from ortools.sat.python import cp_model
 
 from pyjobshop.solvers.ortools.Solver import Solver
-from simpyjobshop.EliteSolutions import EliteSolutions
+from simpyjobshop.EliteSet import EliteSet
 from simpyjobshop.problems.Problem import Problem
 from simpyjobshop.Simulator import Simulator
 from simpyjobshop.utils import find_schedule_per_resource
@@ -59,7 +59,7 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
             self.stop_time = float("inf")
         else:
             self.stop_time = stop_time
-        self.solutions = EliteSolutions()
+        self.solutions = EliteSet()
         self.solver: Solver | None = None
 
         self.callback_log: list[str] = []
