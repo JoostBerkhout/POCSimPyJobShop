@@ -2,6 +2,7 @@ import time
 from typing import List
 
 import numpy as np
+from tqdm.contrib.concurrent import process_map
 
 from pyjobshop import Solution
 from simpyjobshop.evaluator import evaluator
@@ -14,12 +15,12 @@ class Simulator:
 
     Attributes
     ----------
-    problem
+    problem : Problem
         Problem representation.
     solution : Solution
-        A callable representing the solution to be evaluated.
+        Representing the solution to be evaluated.
     data_generator : DataGenerator
-        Instance of DataGenerator to generate input data.
+        Instance of DataGenerator to generate random data.
     results : List[float]
         List of results from simulation runs.
     """
@@ -29,6 +30,44 @@ class Simulator:
         self.solution = solution
         self.data_generator = problem.build_data_generator()
         self.results: List[float] = []
+
+    def parallel_simulate(
+        self,
+        num_sims: int,
+        num_workers: int | None = None,
+    ) -> None:
+        """
+        Performs `num_sims` simulation runs in parallel using process_map.
+
+        Parameters
+        ----------
+        num_sims : int
+            The number of simulations to run.
+        num_workers : int, optional
+            Number of parallel workers to use, by default None.
+
+        Notes
+        -----
+        - Results are appended to self.results in order of input.
+        """
+
+        data_list = [self.data_generator.random() for _ in range(num_sims)]
+        args_list = [
+            (self.solution, self.problem, data, 1) for data in data_list
+        ]
+
+        results = process_map(
+            Simulator._single_sim,
+            args_list,
+            max_workers=num_workers,
+        )
+
+        self.results.extend(results)
+
+    @staticmethod
+    def _single_sim(args: tuple) -> float:
+        solution, problem, data, num_workers = args
+        return evaluator(solution, problem, data, None)
 
     def simulate(
         self,

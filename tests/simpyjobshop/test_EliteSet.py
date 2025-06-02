@@ -6,6 +6,8 @@ import pytest
 from pyjobshop import Solution
 from simpyjobshop.EliteSet import EliteSet
 from simpyjobshop.Simulator import Simulator
+from simpyjobshop.SolutionCallback import SolutionCallback
+from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
 
 
 @pytest.fixture
@@ -253,3 +255,80 @@ def test_sim_to_time_limit(elite_set):
 
     # Test 4: Check time limit
     assert 0.1 <= duration <= 0.15
+
+
+@pytest.mark.slow  # add keyword "not slow" to pytest to ignore this
+def test_parallel_simulate_to_num_sims():
+    """
+    Tests parallel_simulate_to_num_sims for one-machine problem with ten jobs.
+    """
+
+    # Create a model
+    problem = OneMachineTenJobs()
+    data_generator = problem.build_data_generator()
+    data = data_generator.quantile(0.7)
+    model = problem.concrete_model(data)
+
+    # Solve the problem with a callback for solution generation
+    num_sims = 2
+    callback = SolutionCallback(problem, num_sims=num_sims)
+    model.solve(callback=callback, display=False, num_workers=1)
+    solutions: EliteSet = callback.solutions
+
+    # Run parallel simulation to a fixed number of simulations
+    solutions.parallel_simulate_to_num_sims(5, num_workers=8)
+    solutions.parallel_simulate_to_num_sims(8, num_workers=8)
+
+    # Redo the experiment with serial simulation
+    callback = SolutionCallback(problem, num_sims=num_sims)
+    model.solve(callback=callback, display=False, num_workers=1)
+    solutions_2: EliteSet = callback.solutions
+    solutions_2.simulate_to_num_sims(5)
+    solutions_2.simulate_to_num_sims(8)
+
+    # Test whether simulation results coincide
+    for sol_1, sol_2 in zip(solutions, solutions_2, strict=False):
+        assert sol_1.solution == sol_2.solution
+        assert sol_1.simulator.results == sol_2.simulator.results
+
+
+@pytest.mark.slow  # add keyword "not slow" to pytest to ignore this
+def test_parallel_simulate_to_time_limit():
+    """
+    Tests parallel_simulate_to_time_limit for one-machine problem with 10 jobs.
+    """
+
+    # Create a model
+    problem = OneMachineTenJobs()
+    data_generator = problem.build_data_generator()
+    data = data_generator.quantile(0.7)
+    model = problem.concrete_model(data)
+
+    # Solve the problem with a callback for solution generation
+    num_sims = 2
+    callback = SolutionCallback(problem, num_sims=num_sims)
+    model.solve(callback=callback, display=False, num_workers=1)
+    solutions: EliteSet = callback.solutions
+
+    # Run parallel simulation to a time limit
+    time_limit = 2
+    approx_setup_time_process_map = 7
+    start_time = time.time()
+    solutions.parallel_simulate_to_time_limit(time_limit, num_workers=8)
+    elapsed_time = time.time() - start_time
+    assert elapsed_time <= time_limit + approx_setup_time_process_map
+
+    # Simulate all elites till max num of simulations
+    max_num_sims = max(sol.simulator.num_sims for sol in solutions)
+    solutions.simulate_to_num_sims(max_num_sims)
+
+    # Redo the experiment with serial simulation
+    callback = SolutionCallback(problem, num_sims=num_sims)
+    model.solve(callback=callback, display=False, num_workers=1)
+    solutions_2: EliteSet = callback.solutions
+    solutions_2.simulate_to_num_sims(max_num_sims)
+
+    # Test whether simulation results coincide
+    for sol_1, sol_2 in zip(solutions, solutions_2, strict=False):
+        assert sol_1.solution == sol_2.solution
+        assert sol_1.simulator.results == sol_2.simulator.results

@@ -1,6 +1,9 @@
+import math
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional
+
+from tqdm.contrib.concurrent import process_map
 
 from pyjobshop import Solution
 from simpyjobshop.Simulator import Simulator
@@ -275,3 +278,111 @@ class EliteSet:
             self.simulate_to_num_sims(max_num_sims, remaining_time)
             max_num_sims += 1
             time_spent = time.time() - start_time
+
+    def parallel_simulate_to_num_sims(
+        self,
+        num_sims: int,
+        num_workers: int,
+        time_limit: float | None = None,
+    ) -> None:
+        """
+        Ensures all solutions are simulated in parallel up to the given number.
+
+        Parameters
+        ----------
+        num_sims : int
+            The number of simulations each solution should have.
+        num_workers : int
+            Number of parallel workers.
+        time_limit : float, optional
+            Max time allowed for simulation (in seconds).
+
+        Notes
+        -----
+        - Only solutions with < `num_sims` simulations are processed.
+        - Remaining time is fixed before dispatch, not updated during
+        execution. All workers receive the same time_limit, so if tasks run in
+        multiple rounds (due to limited num_workers), later tasks may exceed
+        the intended limit.
+        """
+
+        args_list = []
+        sol_list = []
+
+        for sol in self._solutions:
+            current_num_sims = sol.simulator.num_sims
+            if current_num_sims < num_sims:
+                extra_sims = num_sims - current_num_sims
+                args = (sol.simulator, extra_sims, time_limit)
+                args_list.append(args)
+                sol_list.append(sol)  # corresponding solution
+
+        simulators = process_map(
+            self._simulate_wrapper,
+            args_list,
+            max_workers=num_workers,
+        )
+
+        for sol, sim in zip(sol_list, simulators, strict=True):
+            sol.simulator = sim
+
+    def parallel_simulate_to_time_limit(
+        self,
+        time_limit: float,
+        num_workers: int,
+        setup_time_process_map: Optional[float] = None,
+    ) -> None:
+        """
+        All solutions are simulated in parallel till given time limit.
+
+        Parameters
+        ----------
+        time_limit : float
+            Max time allowed for simulation (in seconds).
+        num_workers : int
+            Number of parallel workers.
+        setup_time_process_map : float, optional
+            Time to set up process_map (in seconds).
+        """
+
+        args_list = []
+        sol_list = []
+        num_map_loops = math.ceil(len(self._solutions) / num_workers)
+        if setup_time_process_map is None:
+            setup_time_process_map = 0.0
+        net_time_limit = time_limit - setup_time_process_map
+        worker_time_limit = net_time_limit / num_map_loops
+        inf = 10**18
+
+        for sol in self._solutions:
+            args = (sol.simulator, inf, worker_time_limit)
+            args_list.append(args)
+            sol_list.append(sol)  # corresponding solution
+
+        simulators = process_map(
+            self._simulate_wrapper,
+            args_list,
+            max_workers=num_workers,
+        )
+
+        for sol, sim in zip(sol_list, simulators, strict=False):
+            sol.simulator = sim
+
+    @staticmethod
+    def _simulate_wrapper(args: tuple) -> Simulator:
+        """
+        Helper for parallel simulation of a single simulator.
+
+        Parameters
+        ----------
+        args : tuple
+            A tuple of (simulator, extra_sims, time_limit).
+
+        Notes
+        -----
+        - Since process_map makes a copy of simulator, the original simulator
+        is not modified. Therefore, the simulator needs to be returned.
+        """
+        simulator, extra_sims, time_limit = args
+        simulator.simulate(extra_sims, time_limit=time_limit)
+        return simulator

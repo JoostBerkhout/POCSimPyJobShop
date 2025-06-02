@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from simpyjobshop.Simulator import Simulator
 from simpyjobshop.SolutionCallback import SolutionCallback
 from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
@@ -67,3 +69,44 @@ def test_simulator():
     elapsed_time = time.time() - start_time
     assert elapsed_time > time_limit
     assert elapsed_time < time_limit + 1.0
+
+
+@pytest.mark.slow  # add keyword "not slow" to pytest to ignore this
+def test_parallel_simulate():
+    """
+    Tests if parallel_simulate works for one-machine problem with ten jobs.
+    """
+
+    # Create a model
+    problem = OneMachineTenJobs()
+    data_generator = problem.build_data_generator()
+    data = data_generator.quantile(0.7)
+    model = problem.concrete_model(data)
+
+    # Solve the problem with a callback for solution generation
+    num_sims = 2
+    callback = SolutionCallback(problem, num_sims=num_sims)
+    model.solve(callback=callback, display=False)
+    elite_solution = callback.solutions.get_best_mean_solution()
+    solution = elite_solution.solution
+    simulator = elite_solution.simulator
+
+    # Make a new simulator and simulate the solution
+    new_simulator = Simulator(problem, solution)
+    new_simulator.parallel_simulate(num_sims, num_workers=2)
+
+    # Test whether simulation results coincide
+    assert num_sims == new_simulator.num_sims == simulator.num_sims
+    assert new_simulator.mean == simulator.mean
+    assert new_simulator.variance == simulator.variance
+
+    # Simulate twice extra
+    extra_sims = 2
+    num_sims += extra_sims
+    simulator.simulate(extra_sims)
+    new_simulator.parallel_simulate(extra_sims, num_workers=8)
+
+    # Test whether simulation results coincide
+    assert num_sims == new_simulator.num_sims == simulator.num_sims
+    assert new_simulator.mean == simulator.mean
+    assert new_simulator.variance == simulator.variance
