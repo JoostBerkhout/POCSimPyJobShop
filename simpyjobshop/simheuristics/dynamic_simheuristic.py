@@ -134,6 +134,7 @@ def dynamic_simheuristic(
             time_limit=cp_time_limit,
             num_workers=exp_config["num_workers"],
         )
+        log_solve_status(callback, result)
 
         # Update current solution
         current_solution = result.best
@@ -159,6 +160,24 @@ def dynamic_simheuristic(
         wandb.finish()
 
     return callback, result, durations
+
+
+def parse_solve_status(solve_status: str) -> int:
+    """
+    Helper function to change status to an integer for wandb plot.
+    """
+    if solve_status == "Optimal":
+        return 0
+    elif solve_status == "Feasible":
+        return 1
+    elif solve_status == "Infeasible":
+        return 2
+    elif solve_status == "Time-limit":
+        return 3
+    elif solve_status == "Unknown":
+        return 4
+    else:
+        raise ValueError(f"Unknown solve status: {solve_status}")
 
 
 def parse_model_key(model_key: str) -> float:
@@ -194,6 +213,17 @@ def log_model(
     wandb.log(log_data)
 
 
+def log_solve_status(callback: SolutionCallback, result: Result):
+    """
+    Log the solve status of the last CP solve.
+    """
+    log_data = {
+        "Time (in seconds)": callback.time_spent,
+        "Solve status": parse_solve_status(result.status),
+    }
+    wandb.log(log_data)
+
+
 def select_weighted_random_key(scores: dict[str, int]) -> str:
     """
     Randomly select a key with selection probability proportional to its score.
@@ -226,25 +256,34 @@ def update_scores(
     simh_config: DynamicSimheuristicConfig,
 ):
     """Helper function to update the scores in-place."""
+
+    # Init
     solutions = callback.solutions
     if solutions.none_simulated():
-        msg = (
-            "Updating scores, but no solutions simulated yet. They will"
-            " be simulated now."
-        )
-        callback._log_event(msg)
+        callback._log_event("No solutions simulated yet. Simulating now...")
         solutions.simulate_to_num_sims(simh_config["num_sims"])
         callback._log_event("Simulation finished.")
     best_obj = solutions.get_best_mean_solution().simulator.mean
     worst_obj = solutions.get_worst_mean_solution().simulator.mean
+
+    # Find score change and update best and worst of elite tracker
     if best_obj < elite_tracker["best mean"]:
-        scores[model_key] += simh_config["score_finding_new_best"]
+        score_change = simh_config["score_finding_new_best"]
         elite_tracker["best mean"] = best_obj
         elite_tracker["worst mean"] = worst_obj  # by definition new worst
     elif worst_obj < elite_tracker["worst mean"]:
-        scores[model_key] += simh_config["score_finding_new_elite"]
+        score_change = simh_config["score_finding_new_elite"]
         elite_tracker["worst mean"] = worst_obj
     else:
-        scores[model_key] -= simh_config["init_score"]
-        if scores[model_key] < simh_config["init_score"]:
-            scores[model_key] = simh_config["init_score"]
+        score_change = -simh_config["init_score"]
+
+    # Apply score change
+    scores[model_key] = max(
+        scores[model_key] + score_change, simh_config["init_score"]
+    )
+    wandb.log(
+        {
+            "Time (in seconds)": callback.time_spent,
+            model_key + "_score_change": score_change,
+        }
+    )

@@ -34,6 +34,18 @@ inherits `Problem`. The user has to overwrite:
 It tries to follow the model and data separation paradigm
 from algebraic modeling languages. See the `problems` folder for examples.
 
+## Details about experiments
+
+- To replicate an experiment on Snellius: look at the date-and-time stamp of the results .csv file. Then go back to the latest commit before that date-and-time stamp. That gives all the code and settings used for that particular experiment.
+- If there is a folder in experiments/configs folder with a specific problem name, then that folder contains the configuration files for that problem. The configuration files are used to run the experiments on Snellius.
+- Steps on Snellius to run experiments for `SomeProblemName`:
+    1. Go to the right folder with the root of the repository.
+    2. `git pull` to get the latest code.
+    3. Run `uv run experiments/submit_slurm_job.py --problem SomeProblemName --mock true` to check whether the instructions seem to be in order.
+    4. Run `uv run experiments/submit_slurm_job.py --problem SomeProblemName` to submit the job to the cluster.
+    5. Wait for the job to finish. You can check the status of the job with `squeue -u <your_username>`.
+    6. Once the job is finished, you can find the results in the `experiments/results` folder. The results are stored in a .csv file with the name of the problem and the date-and-time stamp of when the experiment was run.
+
 # README.md file for PyJobShop below
 
 ![PyJobShop logo](docs/source/assets/images/logo.svg)

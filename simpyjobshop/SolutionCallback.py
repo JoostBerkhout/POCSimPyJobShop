@@ -127,12 +127,12 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
                     self.solutions.simulate_to_num_sims(self.num_sims)
                     self._log_event("Simulation ended.")
 
-                if wandb.run is not None:
-                    self._log_to_wandb(simulator)
-
                 if self.max_size_elite_set is not None:
                     self.solutions.keep_top_n(self.max_size_elite_set)
                     self._log_event("Elite set trimmed.")
+
+                if wandb.run is not None:
+                    self._log_to_wandb(simulator)
 
             elif not new_schedule:
                 self._log_event("Duplicate schedule. Ignored.")
@@ -157,10 +157,13 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
 
         if self.simulation_started:
             best_elite = self.solutions.get_best_mean_solution()
+            worst_elite = self.solutions.get_worst_mean_solution()
             log_data.update(
                 {
                     "Mean objective new candidate": simulator.mean,
                     "Best mean objective": best_elite.simulator.mean,
+                    "Worst mean objective": worst_elite.simulator.mean,
+                    # Note: worst can increase when max elite set not reached
                 }
             )
 
