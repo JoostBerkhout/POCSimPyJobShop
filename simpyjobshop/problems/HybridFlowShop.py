@@ -11,11 +11,15 @@ from simpyjobshop.DiscreteRV import (
 from simpyjobshop.problems.Problem import Problem
 
 
-class HybridFlowShop(Problem):
+class HybridFlowShopBase(Problem):
     """
-    Specific implementation of a hybrid flow shop. Taken from the notebook
-    hybrid_flow_shop.ipynb.
+    Base implementation of a hybrid flow shop.
+    It can be inherited by specific hybrid flow shop instances that specify
+    prob_random_duration and weight_total_tardiness.
     """
+
+    prob_random_duration: float
+    weight_total_tardiness: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -93,7 +97,7 @@ class HybridFlowShop(Problem):
         num_machines = [4, 5, 4]
         loc = 1
         max_rand_mean = 15
-        prob_random_duration = 0.3
+        prob_random_duration = self.prob_random_duration
 
         # Job durations
         np.random.seed(seed)  # for reproducibility
@@ -101,7 +105,7 @@ class HybridFlowShop(Problem):
         gen: DiscreteRV
         for job in range(num_jobs):
             for stage in range(num_stages):
-                mean_job_duration = np.random.randint(1, max_rand_mean + 1)
+                mean_job_duration = np.random.randint(max_rand_mean)
                 mean_job_durations[job, stage] = mean_job_duration
                 if np.random.rand() < prob_random_duration:
                     gen = SeededPoisson(
@@ -157,9 +161,29 @@ class HybridFlowShop(Problem):
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0
-        constants["weight_total_tardiness"] = 0
+        constants["weight_total_tardiness"] = self.weight_total_tardiness
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
         constants["weight_max_lateness"] = 0
 
         return distributions, constants
+
+
+class HybridFlowShop(HybridFlowShopBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 100
+
+
+class HybridFlowShopFullStoch(HybridFlowShopBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 100
+
+
+class HybridFlowShopNoTard(HybridFlowShopBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 0  # no tardiness
+
+
+class HybridFlowShopFullStochNoTard(HybridFlowShopBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 0  # no tardiness

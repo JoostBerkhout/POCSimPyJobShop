@@ -8,10 +8,15 @@ from simpyjobshop.DiscreteRV import Constant, DiscreteRV, SeededPoisson
 from simpyjobshop.problems.Problem import Problem
 
 
-class ParallelMachines(Problem):
+class ParallelMachinesBase(Problem):
     """
-    Specific implementation of a parallel machine scheduling problem.
+    Base implementation of a parallel machines scheduling problem.
+    It can be inherited by specific parallel machines instances that specify
+    prob_random_duration and weight_total_tardiness.
     """
+
+    prob_random_duration: float
+    weight_total_tardiness: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -78,7 +83,7 @@ class ParallelMachines(Problem):
         loc = 1
         max_rand_mean = 15
         max_setup_time = 10
-        prob_random_duration = 0.3
+        prob_random_duration = self.prob_random_duration
 
         # job durations
         np.random.seed(seed)  # for reproducibility
@@ -87,7 +92,7 @@ class ParallelMachines(Problem):
         for m in range(num_machines):
             mean_job_durations.append([])
             for i in range(num_jobs):
-                mean_job_duration = np.random.randint(1, max_rand_mean + 1)
+                mean_job_duration = np.random.randint(max_rand_mean)
                 mean_job_durations[-1].append(mean_job_duration)
                 if np.random.rand() < prob_random_duration:
                     dur_seed = i + m * num_jobs
@@ -131,9 +136,29 @@ class ParallelMachines(Problem):
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0
-        constants["weight_total_tardiness"] = 0
+        constants["weight_total_tardiness"] = self.weight_total_tardiness
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
         constants["weight_max_lateness"] = 0
 
         return distributions, constants
+
+
+class ParallelMachines(ParallelMachinesBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 100
+
+
+class ParallelMachinesFullStoch(ParallelMachinesBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 100
+
+
+class ParallelMachinesNoTard(ParallelMachinesBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 0  # no tardiness
+
+
+class ParallelMachinesFullStochNoTard(ParallelMachinesBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 0  # no tardiness

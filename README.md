@@ -1,3 +1,41 @@
+# SimPyJobShop
+
+SimPyJobShop is a Python library for solving stochastic scheduling problems with constraint programming making use of PyJobShop and simulation.
+
+## Structure of code
+
+The codebase is currently organized into the following main components:
+- `simpyjobshop`: Contains the main library code for SimPyJobShop:
+  - Root contains the main library code, which is used to solve stochastic scheduling problems.
+  - `problems`: Contains the stochastic scheduling problems to be solved.
+  - `simheuristics`: Contains the simheuristics for solving the stochastic scheduling problems.
+- `pyjobshop`: Contains the PyJobShop library code, which is used as a dependency for SimPyJobShop.
+- `experiments`: Contains scripts for running experiments and generating results:
+  - Root contains the main scripts for running experiments locally and on the cluster. Detailed in the following section. 
+  - `configs`: Contains configuration files for the experiments.
+  - `results`: Contains the results of the experiments.
+  - `notebooks`: Contains Jupyter notebooks for analyzing the results of the experiments.
+  - `utils`: Contains utility functions for the experiments.
+- `tests`: Contains unit tests for the library. It uses the same structure as the `simpyjobshop` directory, with each module having a corresponding test module.
+
+## Details about `simpyjobshop`
+
+This package provides code for solving stochastic PyJobShop scheduling problems
+using simheuristics. By fixing solutions in PyJobShop, it allows to "simulate"
+solutions for randomly generated data.
+
+For each stochastic PyJobShop problem the user wants to solve with
+simheuristics, the user has to make a class in subfolder `problems` that
+inherits `Problem`. The user has to overwrite:
+
+- `Problem.conrete_model()` with the concrete model for concrete `data`.
+- `Problem.distribution_data()` that returns the distribution and constant data.
+
+It tries to follow the model and data separation paradigm
+from algebraic modeling languages. See the `problems` folder for examples.
+
+# README.md file for PyJobShop below
+
 ![PyJobShop logo](docs/source/assets/images/logo.svg)
 
 [![PyPI](https://img.shields.io/pypi/v/PyJobShop?style=flat-square)](https://pypi.org/project/pyjobshop/)

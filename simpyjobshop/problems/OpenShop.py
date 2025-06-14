@@ -12,11 +12,15 @@ from simpyjobshop.problems.MachineSchedule import MachineSchedule
 from simpyjobshop.problems.Problem import Problem
 
 
-class OpenShop(Problem):
+class OpenShopBase(Problem):
     """
-    Specific implementation of an open shop scheduling problem.
-    It takes FlexibleJobShop as a basis.
+    Base implementation of an open shop scheduling problem.
+    It can be inherited by specific open shop problem instances that specify
+    prob_random_duration and weight_total_tardiness.
     """
+
+    prob_random_duration: float
+    weight_total_tardiness: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -72,14 +76,14 @@ class OpenShop(Problem):
         num_machines = 5
         loc = 1
         max_rand_mean = 15
-        prob_random_duration = 0.3
+        prob_random_duration = self.prob_random_duration
 
         # Set job distributions
         np.random.seed(seed)  # for reproducibility
         gen: DiscreteRV
         for job in range(num_jobs):
             for machine in range(num_machines):
-                mean_job_duration = np.random.randint(1, max_rand_mean + 1)
+                mean_job_duration = np.random.randint(max_rand_mean)
                 if np.random.rand() < prob_random_duration:
                     gen = SeededPoisson(
                         lam=mean_job_duration,
@@ -116,9 +120,29 @@ class OpenShop(Problem):
         constants["weight_makespan"] = 0
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 1
-        constants["weight_total_tardiness"] = 0
+        constants["weight_total_tardiness"] = self.weight_total_tardiness
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
         constants["weight_max_lateness"] = 0
 
         return distributions, constants
+
+
+class OpenShop(OpenShopBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 100
+
+
+class OpenShopFullStoch(OpenShopBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 100
+
+
+class OpenShopNoTard(OpenShopBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 0  # no tardiness
+
+
+class OpenShopFullStochNoTard(OpenShopBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 0  # no tardiness

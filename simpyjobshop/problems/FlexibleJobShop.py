@@ -12,11 +12,15 @@ from simpyjobshop.problems.MachineSchedule import MachineSchedule
 from simpyjobshop.problems.Problem import Problem
 
 
-class FlexibleJobShop(Problem):
+class FlexibleJobShopBase(Problem):
     """
-    Specific implementation of a flexible flow shop. Inspired by the notebook
-    flexible_job_shop.ipynb.
+    Base implementation of a flexible job shop.
+    It can be inherited by specific flexible job shop instances that specify
+    prob_random_duration and weight_total_tardiness.
     """
+
+    prob_random_duration: float
+    weight_total_tardiness: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -97,7 +101,7 @@ class FlexibleJobShop(Problem):
         num_machines = 5
         loc = 1
         max_rand_mean = 15
-        prob_random_duration = 0.3
+        prob_random_duration = self.prob_random_duration
 
         # Set job distributions
         np.random.seed(seed)  # for reproducibility
@@ -107,7 +111,7 @@ class FlexibleJobShop(Problem):
             prev_task_end = 0
             for task in range(num_tasks):
                 for machine in range(num_machines):
-                    mean_job_duration = np.random.randint(1, max_rand_mean + 1)
+                    mean_job_duration = np.random.randint(max_rand_mean)
                     if np.random.rand() < prob_random_duration:
                         gen = SeededPoisson(
                             lam=mean_job_duration,
@@ -150,9 +154,29 @@ class FlexibleJobShop(Problem):
         constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
         constants["weight_total_flow_time"] = 0
-        constants["weight_total_tardiness"] = 0
+        constants["weight_total_tardiness"] = self.weight_total_tardiness
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
         constants["weight_max_lateness"] = 0
 
         return distributions, constants
+
+
+class FlexibleJobShop(FlexibleJobShopBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 100
+
+
+class FlexibleJobShopFullStoch(FlexibleJobShopBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 100
+
+
+class FlexibleJobShopNoTard(FlexibleJobShopBase):
+    prob_random_duration = 0.3
+    weight_total_tardiness = 0  # no tardiness
+
+
+class FlexibleJobShopFullStochNoTard(FlexibleJobShopBase):
+    prob_random_duration = 1.0  # full stochasticity (FS)
+    weight_total_tardiness = 0  # no tardiness
