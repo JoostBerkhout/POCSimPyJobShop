@@ -2,14 +2,24 @@
 
 # List of problem class names
 PROBLEMS=(
+    OpenShop
+    OpenShopFullStoch
     OpenShopNoTard
     OpenShopFullStochNoTard
+    FlexibleJobShop
+    FlexibleJobShopFullStoch
     FlexibleJobShopNoTard
     FlexibleJobShopFullStochNoTard
+    HybridFlowShop
+    HybridFlowShopFullStoch
     HybridFlowShopNoTard
     HybridFlowShopFullStochNoTard
+    JobShop
+    JobShopFullStoch
     JobShopNoTard
     JobShopFullStochNoTard
+    ParallelMachines
+    ParallelMachinesFullStoch
     ParallelMachinesNoTard
     ParallelMachinesFullStochNoTard
 )
