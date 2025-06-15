@@ -16,11 +16,12 @@ class OpenShopBase(Problem):
     """
     Base implementation of an open shop scheduling problem.
     It can be inherited by specific open shop problem instances that specify
-    prob_random_duration and weight_total_tardiness.
+    prob_random_duration, weight_total_tardiness and min_mean.
     """
 
     prob_random_duration: float
     weight_total_tardiness: int
+    min_mean: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -83,7 +84,9 @@ class OpenShopBase(Problem):
         gen: DiscreteRV
         for job in range(num_jobs):
             for machine in range(num_machines):
-                mean_job_duration = np.random.randint(max_rand_mean)
+                mean_job_duration = np.random.randint(
+                    self.min_mean, self.min_mean + max_rand_mean
+                )
                 if np.random.rand() < prob_random_duration:
                     gen = SeededPoisson(
                         lam=mean_job_duration,
@@ -131,18 +134,22 @@ class OpenShopBase(Problem):
 class OpenShop(OpenShopBase):
     prob_random_duration = 0.3
     weight_total_tardiness = 100
+    min_mean = 0
 
 
 class OpenShopFullStoch(OpenShopBase):
     prob_random_duration = 1.0  # full stochasticity (FS)
     weight_total_tardiness = 100
+    min_mean = 0
 
 
 class OpenShopNoTard(OpenShopBase):
     prob_random_duration = 0.3
     weight_total_tardiness = 0  # no tardiness
+    min_mean = 1
 
 
 class OpenShopFullStochNoTard(OpenShopBase):
     prob_random_duration = 1.0  # full stochasticity (FS)
     weight_total_tardiness = 0  # no tardiness
+    min_mean = 1

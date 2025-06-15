@@ -15,11 +15,12 @@ class HybridFlowShopBase(Problem):
     """
     Base implementation of a hybrid flow shop.
     It can be inherited by specific hybrid flow shop instances that specify
-    prob_random_duration and weight_total_tardiness.
+    prob_random_duration, weight_total_tardiness and min_mean.
     """
 
     prob_random_duration: float
     weight_total_tardiness: int
+    min_mean: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -105,7 +106,9 @@ class HybridFlowShopBase(Problem):
         gen: DiscreteRV
         for job in range(num_jobs):
             for stage in range(num_stages):
-                mean_job_duration = np.random.randint(max_rand_mean)
+                mean_job_duration = np.random.randint(
+                    self.min_mean, self.min_mean + max_rand_mean
+                )
                 mean_job_durations[job, stage] = mean_job_duration
                 if np.random.rand() < prob_random_duration:
                     gen = SeededPoisson(
@@ -172,18 +175,22 @@ class HybridFlowShopBase(Problem):
 class HybridFlowShop(HybridFlowShopBase):
     prob_random_duration = 0.3
     weight_total_tardiness = 100
+    min_mean = 0
 
 
 class HybridFlowShopFullStoch(HybridFlowShopBase):
     prob_random_duration = 1.0  # full stochasticity (FS)
     weight_total_tardiness = 100
+    min_mean = 0
 
 
 class HybridFlowShopNoTard(HybridFlowShopBase):
     prob_random_duration = 0.3
     weight_total_tardiness = 0  # no tardiness
+    min_mean = 1
 
 
 class HybridFlowShopFullStochNoTard(HybridFlowShopBase):
     prob_random_duration = 1.0  # full stochasticity (FS)
     weight_total_tardiness = 0  # no tardiness
+    min_mean = 1

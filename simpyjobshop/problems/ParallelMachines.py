@@ -12,11 +12,12 @@ class ParallelMachinesBase(Problem):
     """
     Base implementation of a parallel machines scheduling problem.
     It can be inherited by specific parallel machines instances that specify
-    prob_random_duration and weight_total_tardiness.
+    prob_random_duration, weight_total_tardiness and min_mean.
     """
 
     prob_random_duration: float
     weight_total_tardiness: int
+    min_mean: int
 
     @staticmethod
     def concrete_model(data: Dict[str, Any]) -> Model:
@@ -92,7 +93,9 @@ class ParallelMachinesBase(Problem):
         for m in range(num_machines):
             mean_job_durations.append([])
             for i in range(num_jobs):
-                mean_job_duration = np.random.randint(max_rand_mean)
+                mean_job_duration = np.random.randint(
+                    self.min_mean, self.min_mean + max_rand_mean
+                )
                 mean_job_durations[-1].append(mean_job_duration)
                 if np.random.rand() < prob_random_duration:
                     dur_seed = i + m * num_jobs
@@ -147,18 +150,22 @@ class ParallelMachinesBase(Problem):
 class ParallelMachines(ParallelMachinesBase):
     prob_random_duration = 0.3
     weight_total_tardiness = 100
+    min_mean = 0
 
 
 class ParallelMachinesFullStoch(ParallelMachinesBase):
     prob_random_duration = 1.0  # full stochasticity (FS)
     weight_total_tardiness = 100
+    min_mean = 0
 
 
 class ParallelMachinesNoTard(ParallelMachinesBase):
     prob_random_duration = 0.3
     weight_total_tardiness = 0  # no tardiness
+    min_mean = 1
 
 
 class ParallelMachinesFullStochNoTard(ParallelMachinesBase):
     prob_random_duration = 1.0  # full stochasticity (FS)
     weight_total_tardiness = 0  # no tardiness
+    min_mean = 1
