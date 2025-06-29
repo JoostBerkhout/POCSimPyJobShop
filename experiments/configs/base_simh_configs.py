@@ -1,8 +1,10 @@
 from experiments.configs.base_exp_config import exp_config
 from experiments.utils.SimheuristicSpec import SimheuristicSpec
 from simpyjobshop.simheuristics import (
-    SimulateLastSolutionsConfig,
-    simulate_last_solutions,
+    # SimulateLastSolutionsConfig,
+    # simulate_last_solutions,
+    StandardSimheuristicConfig,
+    standard_simheuristic,
 )
 
 # Simheuristic configurations
@@ -18,53 +20,69 @@ from simpyjobshop.simheuristics import (
 # det_opt_conf_4: DeterministicOptimizationConfig = {
 #     "det_repr": 0.8,
 # }
-sim_last_config_1: SimulateLastSolutionsConfig = {
-    "det_repr": "mean",
-    "max_size_elite_set": 5,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_2: SimulateLastSolutionsConfig = {
-    "det_repr": "mean",
-    "max_size_elite_set": 10,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_3: SimulateLastSolutionsConfig = {
-    "det_repr": 0.6,
-    "max_size_elite_set": 5,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_4: SimulateLastSolutionsConfig = {
-    "det_repr": 0.6,
-    "max_size_elite_set": 10,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_5: SimulateLastSolutionsConfig = {
-    "det_repr": 0.7,
-    "max_size_elite_set": 5,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_6: SimulateLastSolutionsConfig = {
-    "det_repr": 0.7,
-    "max_size_elite_set": 10,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_7: SimulateLastSolutionsConfig = {
-    "det_repr": 0.8,
-    "max_size_elite_set": 5,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
-sim_last_config_8: SimulateLastSolutionsConfig = {
-    "det_repr": 0.8,
-    "max_size_elite_set": 10,
-    "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-}
+# sim_last_config_1: SimulateLastSolutionsConfig = {
+#     "det_repr": "mean",
+#     "max_size_elite_set": 5,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_2: SimulateLastSolutionsConfig = {
+#     "det_repr": "mean",
+#     "max_size_elite_set": 10,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_3: SimulateLastSolutionsConfig = {
+#     "det_repr": 0.6,
+#     "max_size_elite_set": 5,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_4: SimulateLastSolutionsConfig = {
+#     "det_repr": 0.6,
+#     "max_size_elite_set": 10,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_5: SimulateLastSolutionsConfig = {
+#     "det_repr": 0.7,
+#     "max_size_elite_set": 5,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_6: SimulateLastSolutionsConfig = {
+#     "det_repr": 0.7,
+#     "max_size_elite_set": 10,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_7: SimulateLastSolutionsConfig = {
+#     "det_repr": 0.8,
+#     "max_size_elite_set": 5,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
+# sim_last_config_8: SimulateLastSolutionsConfig = {
+#     "det_repr": 0.8,
+#     "max_size_elite_set": 10,
+#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
+# }
 # stand_simh_config: StandardSimheuristicConfig = {
 #     "det_repr": "mean",
 #     "num_sims": 20,
-#     "max_size_elite_set": 5,
+#     "max_size_elite_set": 10,
 #     "frac_budget_before_sims": 10 / exp_config["time_limit"],
 #     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
 # }
+stand_simh_configs: list[StandardSimheuristicConfig] = []
+idx = 1
+time_limit = exp_config["time_limit"]
+for num_sims in [20, 40]:
+    for pre_sim in [0, 10]:
+        for det_repr in [0.7, 0.8]:
+            stand_simh_configs.append(
+                {
+                    "det_repr": det_repr,
+                    "num_sims": num_sims,
+                    "max_size_elite_set": 10,
+                    "frac_budget_before_sims": pre_sim / time_limit,
+                    "frac_budget_final_elites_sim": 30 / time_limit,
+                }
+            )
+            idx += 1
 # dyn_simh_config: DynamicSimheuristicConfig = {
 #     "num_sims": 20,
 #     "max_size_elite_set": 5,
@@ -81,14 +99,10 @@ sim_last_config_8: SimulateLastSolutionsConfig = {
 
 simheuristics: list[SimheuristicSpec] = [
     # SimheuristicSpec("det_opt", deterministic_optimization, det_opt_conf),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_1),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_2),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_3),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_4),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_5),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_6),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_7),
-    SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config_8),
-    # SimheuristicSpec("std_simh", standard_simheuristic, stand_simh_config),
+    # SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
+    SimheuristicSpec(
+        f"std_simh_{idx + 1}", standard_simheuristic, stand_simh_config
+    )
+    for idx, stand_simh_config in enumerate(stand_simh_configs)
     # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
 ]
