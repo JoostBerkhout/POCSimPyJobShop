@@ -1,3 +1,4 @@
+from .DemoEURO2025 import ParallelMachinesEURO2025
 from .FlexibleJobShop import (
     FlexibleJobShop,
     FlexibleJobShopFullStoch,
