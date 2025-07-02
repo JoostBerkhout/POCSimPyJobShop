@@ -3,8 +3,10 @@ from experiments.utils.SimheuristicSpec import SimheuristicSpec
 from simpyjobshop.simheuristics import (
     # SimulateLastSolutionsConfig,
     # simulate_last_solutions,
-    StandardSimheuristicConfig,
-    standard_simheuristic,
+    # StandardSimheuristicConfig,
+    # standard_simheuristic,
+    DynamicSimheuristicConfig,
+    dynamic_simheuristic,
 )
 
 # Simheuristic configurations
@@ -60,49 +62,61 @@ from simpyjobshop.simheuristics import (
 #     "max_size_elite_set": 10,
 #     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
 # }
-# stand_simh_config: StandardSimheuristicConfig = {
-#     "det_repr": "mean",
-#     "num_sims": 20,
-#     "max_size_elite_set": 10,
-#     "frac_budget_before_sims": 10 / exp_config["time_limit"],
-#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-# }
-stand_simh_configs: list[StandardSimheuristicConfig] = []
-idx = 1
+# stand_simh_configs: list[StandardSimheuristicConfig] = []
+# idx = 1
+# time_limit = exp_config["time_limit"]
+# for num_sims in [20, 40]:
+#     for pre_sim in [0, 10]:
+#         for det_repr in [0.7, 0.8]:
+#             stand_simh_configs.append(
+#                 {
+#                     "det_repr": det_repr,
+#                     "num_sims": num_sims,
+#                     "max_size_elite_set": 10,
+#                     "frac_budget_before_sims": pre_sim / time_limit,
+#                     "frac_budget_final_elites_sim": 30 / time_limit,
+#                 }
+#             )
+#             # print(f"Std. simheuristic {idx} & {det_repr}-quantiles "
+#             #       f"& {pre_sim}s & {num_sims} \\\\ ")  # for LaTeX table
+#             idx += 1
+dyn_simh_configs: list[DynamicSimheuristicConfig] = []
 time_limit = exp_config["time_limit"]
-for num_sims in [20, 40]:
-    for pre_sim in [0, 10]:
-        for det_repr in [0.7, 0.8]:
-            stand_simh_configs.append(
+idx = 1
+for consider_mean in [True, False]:
+    for max_time_per_cp_solve in [15, 30]:
+        for sigma2 in [2, 3]:
+            dyn_simh_configs.append(
                 {
-                    "det_repr": det_repr,
-                    "num_sims": num_sims,
+                    "num_sims": 20,
                     "max_size_elite_set": 10,
-                    "frac_budget_before_sims": pre_sim / time_limit,
+                    "score_finding_new_elite": 1,
+                    "score_finding_new_best": sigma2,
+                    "init_score": 1,
+                    "max_time_per_cp_solve": max_time_per_cp_solve,
+                    "consider_mean": consider_mean,
+                    "quantiles": [0.6, 0.7, 0.8],
+                    "frac_budget_before_sims": 0,
                     "frac_budget_final_elites_sim": 30 / time_limit,
                 }
             )
+            txt_mean = "with mean" if consider_mean else "w/o mean"
+            print(
+                f"Dyn. simheuristic {idx} & {txt_mean} "
+                f"& {max_time_per_cp_solve}s & {sigma2} \\\\ "
+            )  # LaTeX
             idx += 1
-# dyn_simh_config: DynamicSimheuristicConfig = {
-#     "num_sims": 20,
-#     "max_size_elite_set": 5,
-#     "score_finding_new_elite": 1,
-#     "score_finding_new_best": 2,
-#     "init_score": 1,
-#     "max_time_per_cp_solve": 30,
-#     "consider_mean": True,
-#     "quantiles": [0.6, 0.7, 0.8],
-#     "frac_budget_before_sims": 10 / exp_config["time_limit"],
-#     "frac_budget_final_elites_sim": 30 / exp_config["time_limit"],
-#     # frac_budget_final_elites_sim should be enough to sim. final
-# }
 
 simheuristics: list[SimheuristicSpec] = [
     # SimheuristicSpec("det_opt", deterministic_optimization, det_opt_conf),
     # SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
+    # SimheuristicSpec(
+    #     f"std_simh_{idx + 1}", standard_simheuristic, stand_simh_config
+    # )
+    # for idx, stand_simh_config in enumerate(stand_simh_configs)
     SimheuristicSpec(
-        f"std_simh_{idx + 1}", standard_simheuristic, stand_simh_config
+        f"dyn_simh_{idx + 1}", dynamic_simheuristic, dyn_simh_config
     )
-    for idx, stand_simh_config in enumerate(stand_simh_configs)
+    for idx, dyn_simh_config in enumerate(dyn_simh_configs)
     # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
 ]
