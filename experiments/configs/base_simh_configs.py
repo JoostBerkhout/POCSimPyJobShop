@@ -83,29 +83,27 @@ from simpyjobshop.simheuristics import (
 dyn_simh_configs: list[DynamicSimheuristicConfig] = []
 time_limit = exp_config["time_limit"]
 idx = 1
-for consider_mean in [True, False]:
-    for max_time_per_cp_solve in [15, 30]:
-        for sigma2 in [2, 3]:
-            dyn_simh_configs.append(
-                {
-                    "num_sims": 20,
-                    "max_size_elite_set": 10,
-                    "score_finding_new_elite": 1,
-                    "score_finding_new_best": sigma2,
-                    "init_score": 1,
-                    "max_time_per_cp_solve": max_time_per_cp_solve,
-                    "consider_mean": consider_mean,
-                    "quantiles": [0.6, 0.7, 0.8],
-                    "frac_budget_before_sims": 0,
-                    "frac_budget_final_elites_sim": 30 / time_limit,
-                }
-            )
-            txt_mean = "with mean" if consider_mean else "w/o mean"
-            print(
-                f"Dyn. simheuristic {idx} & {txt_mean} "
-                f"& {max_time_per_cp_solve}s & {sigma2} \\\\ "
-            )  # LaTeX
-            idx += 1
+for max_time_per_cp_solve in [45, 60]:
+    for final_sim_time in [15, 30]:
+        dyn_simh_configs.append(
+            {
+                "num_sims": 20,
+                "max_size_elite_set": 10,
+                "score_finding_new_elite": 1,
+                "score_finding_new_best": 3,
+                "init_score": 1,
+                "max_time_per_cp_solve": max_time_per_cp_solve,
+                "consider_mean": False,
+                "quantiles": [0.6, 0.7, 0.8],
+                "frac_budget_before_sims": 0,
+                "frac_budget_final_elites_sim": final_sim_time / time_limit,
+            }
+        )
+        # print(
+        #     f"Dyn. simh. longer {idx} & {max_time_per_cp_solve}s &"
+        #     f" {final_sim_time}s\\\\ "
+        # )  # LaTeX
+        idx += 1
 
 simheuristics: list[SimheuristicSpec] = [
     # SimheuristicSpec("det_opt", deterministic_optimization, det_opt_conf),
