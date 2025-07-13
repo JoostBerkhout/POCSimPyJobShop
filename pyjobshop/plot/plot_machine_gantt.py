@@ -321,8 +321,8 @@ def plot_machine_gantt_with_tardiness(
         data.resources[idx].name or f"Machine {idx + 1}" for idx in resources
     ]
 
-    ticks = list(range(len(labels)))
-    ticks += [int(y_loc_end)]
+    ticks = [float(x) for x in range(len(labels))]
+    ticks += [float(y_loc_end)]
     labels += ["Due date  "]
     ax.set_yticks(ticks=ticks, labels=labels, fontsize=fontsize)
     ax.set_ylim(-0.5, y_loc_end)
