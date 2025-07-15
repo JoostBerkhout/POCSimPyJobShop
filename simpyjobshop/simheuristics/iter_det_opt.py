@@ -142,7 +142,13 @@ def iter_det_opt(
             simh_config["max_quantile_level"],
         )
 
-    quantiles_history.plot(max_cols=4, figsize=(15, 12))
+    print(
+        f"Number of quantiles changed "
+        f"{len(quantiles_history.changed_params)}"
+    )
+    for _param in quantiles_history.changed_params:
+        print(_param, quantiles_history.history[_param])
+    # quantiles_history.plot(max_cols=4, figsize=(15, 12))
 
     # Log times
     time_spent = time.time() - start_time_exp
@@ -193,7 +199,7 @@ def get_param_quantile_levels(
     -------
     quantiles_lvls : dict[str, float]
         A dictionary mapping each parameter name to an adjusted quantile level
-        based  on its estimated (>= 0) linear impact on the objective value.
+        based on its estimated (>= 0) linear impact on the objective value.
     """
     dep_var = df_rel_diffs["objective_value"]
     indep_vars = df_rel_diffs.drop(columns=["objective_value"])
