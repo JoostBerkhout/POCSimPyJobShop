@@ -27,6 +27,11 @@ class DataGenerator:
         rand_data = {k: int(v.rvs()[0]) for k, v in self.distributions.items()}
         return rand_data | self.constants
 
+    def random_only(self) -> Dict[str, int]:
+        """Only generates random data based on the defined distributions."""
+        rand_data = {k: int(v.rvs()[0]) for k, v in self.distributions.items()}
+        return rand_data
+
     def mean(self) -> Dict[str, float]:
         """Returns the mean of each parameter's distribution."""
         mean_data = {k: v.mean() for k, v in self.distributions.items()}
@@ -40,6 +45,13 @@ class DataGenerator:
     def quantile(self, p: float) -> Dict[str, int]:
         """Returns the p-quantile of each parameter's distribution."""
         quant_data = {k: v.ppf(p) for k, v in self.distributions.items()}
+        return quant_data | self.constants
+
+    def quantiles_by_dict(self, p_dict: dict[str, float]) -> Dict[str, int]:
+        """Returns the p-quantiles of each parameter's distribution."""
+        quant_data = {
+            k: self.distributions[k].ppf(p) for k, p in p_dict.items()
+        }
         return quant_data | self.constants
 
     def by_key(self, key: float | str) -> Dict[str, int]:

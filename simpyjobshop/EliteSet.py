@@ -201,8 +201,8 @@ class EliteSet:
         return min(self._solutions, key=lambda sol: sol.objective)
 
     def print_summary(self):
-        """Prints a summary of the elite solutions."""
-        print("\nElite Solutions:")
+        """Prints a summary of the elite set."""
+        print("\nElite Set:")
         for sol in self._solutions:
             print(
                 f"Solution id: {id(sol.solution)} | "

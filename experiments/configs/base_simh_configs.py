@@ -5,8 +5,8 @@ from simpyjobshop.simheuristics import (
     # simulate_last_solutions,
     # StandardSimheuristicConfig,
     # standard_simheuristic,
-    DynamicSimheuristicConfig,
-    dynamic_simheuristic,
+    IterDetOptConfig,
+    iter_det_opt,
 )
 
 # Simheuristic configurations
@@ -80,30 +80,38 @@ from simpyjobshop.simheuristics import (
 #             # print(f"Std. simheuristic {idx} & {det_repr}-quantiles "
 #             #       f"& {pre_sim}s & {num_sims} \\\\ ")  # for LaTeX table
 #             idx += 1
-dyn_simh_configs: list[DynamicSimheuristicConfig] = []
-time_limit = exp_config["time_limit"]
-idx = 1
-for max_time_per_cp_solve in [45, 60]:
-    for final_sim_time in [15, 30]:
-        dyn_simh_configs.append(
-            {
-                "num_sims": 20,
-                "max_size_elite_set": 10,
-                "score_finding_new_elite": 1,
-                "score_finding_new_best": 3,
-                "init_score": 1,
-                "max_time_per_cp_solve": max_time_per_cp_solve,
-                "consider_mean": False,
-                "quantiles": [0.6, 0.7, 0.8],
-                "frac_budget_before_sims": 0,
-                "frac_budget_final_elites_sim": final_sim_time / time_limit,
-            }
-        )
-        # print(
-        #     f"Dyn. simh. longer {idx} & {max_time_per_cp_solve}s &"
-        #     f" {final_sim_time}s\\\\ "
-        # )  # LaTeX
-        idx += 1
+# dyn_simh_configs: list[DynamicSimheuristicConfig] = []
+# time_limit = exp_config["time_limit"]
+# idx = 1
+# for max_time_per_cp_solve in [45, 60]:
+#     for final_sim_time in [15, 30]:
+#         dyn_simh_configs.append(
+#             {
+#                 "num_sims": 20,
+#                 "max_size_elite_set": 10,
+#                 "score_finding_new_elite": 1,
+#                 "score_finding_new_best": 3,
+#                 "init_score": 1,
+#                 "max_time_per_cp_solve": max_time_per_cp_solve,
+#                 "consider_mean": False,
+#                 "quantiles": [0.6, 0.7, 0.8],
+#                 "frac_budget_before_sims": 0,
+#                 "frac_budget_final_elites_sim": final_sim_time / time_limit,
+#             }
+#         )
+#         print(
+#             f"Dyn. simh. longer {idx} & {max_time_per_cp_solve}s &"
+#             f" {final_sim_time}s\\\\ "
+#         )  # LaTeX
+#         idx += 1
+iter_det_opt_config: IterDetOptConfig = {
+    "num_sims": 100,
+    "frac_budget_each_det_opt": 30 / exp_config["time_limit"],
+    "frac_budget_final_elites_sim": 0,
+    "init_quantile_level": 0.5,
+    "min_quantile_level": 0.5,
+    "max_quantile_level": 0.8,
+}
 
 simheuristics: list[SimheuristicSpec] = [
     # SimheuristicSpec("det_opt", deterministic_optimization, det_opt_conf),
@@ -112,9 +120,10 @@ simheuristics: list[SimheuristicSpec] = [
     #     f"std_simh_{idx + 1}", standard_simheuristic, stand_simh_config
     # )
     # for idx, stand_simh_config in enumerate(stand_simh_configs)
-    SimheuristicSpec(
-        f"dyn_simh_{idx + 1}", dynamic_simheuristic, dyn_simh_config
-    )
-    for idx, dyn_simh_config in enumerate(dyn_simh_configs)
+    # SimheuristicSpec(
+    #     f"dyn_simh_{idx + 1}", dynamic_simheuristic, dyn_simh_config
+    # )
+    # for idx, dyn_simh_config in enumerate(dyn_simh_configs)
     # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
+    SimheuristicSpec("iter_det_opt", iter_det_opt, iter_det_opt_config),
 ]
