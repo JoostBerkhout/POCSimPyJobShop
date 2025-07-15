@@ -36,6 +36,9 @@ dependencies = [
     "pip>=24.3.1",
     "scipy>=1.13.1",
     "wandb>=0.19.0",
+    "ipython>=8.18.1",
+    "pyqt5>=5.15.11",
+    "scikit-learn>=1.6.1",
 ]
 
 
@@ -80,6 +83,7 @@ examples = [
 
 [tool.uv]
 default-groups = ["dev"]
+constraint-dependencies = ["pyqt5-qt5 <=5.15.2"]
 
 
 [tool.uv.sources]
