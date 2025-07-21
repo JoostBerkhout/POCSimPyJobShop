@@ -3,8 +3,8 @@ import csv
 import wandb
 from matplotlib import pyplot as plt
 
-from pyjobshop import Solution
 from pyjobshop.plot import plot_machine_gantt
+from pyjobshop.Solution import Solution
 from simpyjobshop.problems.Problem import Problem
 
 Schedule = dict[int, list[int]]  # resource idx -> task schedule

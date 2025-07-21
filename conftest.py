@@ -11,8 +11,25 @@ def small():
     machine = model.add_machine()
     tasks = [model.add_task(job=job) for _ in range(2)]
 
-    for task, duration in zip(tasks, [1, 2]):
+    for task, duration in zip(tasks, [1, 2], strict=True):
         model.add_mode(task, machine, duration)
+
+    return model.data()
+
+
+@pytest.fixture(scope="session")
+def small_two_machines():
+    model = Model()
+
+    job = model.add_job()
+    machines = [model.add_machine() for _ in range(2)]
+    tasks = [model.add_task(job=job) for _ in range(2)]
+
+    # Add durations: Task i is fast on Machine i, i = 0, 1
+    model.add_mode(tasks[0], machines[0], 1)
+    model.add_mode(tasks[0], machines[1], 2)
+    model.add_mode(tasks[1], machines[0], 2)
+    model.add_mode(tasks[1], machines[1], 1)
 
     return model.data()
 

@@ -140,7 +140,7 @@ def test_print_summary(capsys, elite_set, mock_solution, mock_simulator):
     elite_set.print_summary()
     captured = capsys.readouterr()
 
-    assert "Elite Solutions:" in captured.out
+    assert "Elite Set:" in captured.out
     assert "Objective: 25.00" in captured.out
     assert "'key': 'value'" in captured.out
     assert "Mean: 50.00" in captured.out

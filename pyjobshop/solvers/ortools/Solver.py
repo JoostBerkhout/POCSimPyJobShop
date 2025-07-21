@@ -69,6 +69,7 @@ class Solver:
         num_workers: Optional[int] = None,
         initial_solution: Optional[Solution] = None,
         callback: Optional[Any] = None,
+        exclude_solutions: Optional[list[Solution]] = None,
         **kwargs,
     ) -> Result:
         """
@@ -87,6 +88,10 @@ class Solver:
             Initial solution to start the solver from. Default is no solution.
         callback
             A callback that can be given to the solver.
+        exclude_solutions
+            A list of solutions to exclude. A new solution must differ in mode
+            assignments or task order per resource — differences in start times
+            alone are not enough.
         kwargs
             Additional parameters passed to the solver.
 
@@ -98,6 +103,9 @@ class Solver:
         """
         if initial_solution is not None:
             self._variables.warmstart(initial_solution)
+
+        if exclude_solutions is not None:
+            self._constraints.exclude_solutions(exclude_solutions)
 
         params = {
             "max_time_in_seconds": time_limit,

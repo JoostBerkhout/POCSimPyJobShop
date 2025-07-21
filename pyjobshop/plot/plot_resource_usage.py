@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 
-from pyjobshop import ProblemData, Solution
+from pyjobshop.ProblemData import ProblemData
+from pyjobshop.Solution import Solution
 
 
 def plot_resource_usage(
@@ -62,7 +63,7 @@ def _compute_usage(solution: Solution, data: ProblemData) -> np.ndarray:
     for task in solution.tasks:
         mode = data.modes[task.mode]
 
-        for resource, demand in zip(mode.resources, mode.demands):
+        for resource, demand in zip(mode.resources, mode.demands, strict=True):
             usages[resource, task.start : task.end] += demand
 
     return usages

@@ -14,6 +14,7 @@ def solve(
     num_workers: Optional[int] = None,
     initial_solution: Optional[Solution] = None,
     callback: Optional[Any] = None,
+    exclude_solutions: Optional[list[Solution]] = None,
     **kwargs,
 ) -> Result:
     """
@@ -37,6 +38,10 @@ def solve(
         An initial solution to start the solver from. Default is no solution.
     callback
         A callback that can be given to the solver.
+    exclude_solutions
+        A list of solutions to exclude. A new solution must differ in mode
+        assignments or task order per resource — differences in start times
+        alone are not enough.
     kwargs
         Additional parameters passed to the solver.
 
@@ -59,6 +64,7 @@ def solve(
             num_workers,
             initial_solution,
             callback,
+            exclude_solutions,
             **kwargs,
         )
     elif solver == "cpoptimizer":

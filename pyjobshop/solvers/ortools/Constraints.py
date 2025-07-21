@@ -1,8 +1,12 @@
+from itertools import pairwise
+
 import numpy as np
 from ortools.sat.python.cp_model import BoolVarT, CpModel, LinearExpr
 
 import pyjobshop.solvers.utils as utils
 from pyjobshop.ProblemData import Constraint, Machine, ProblemData
+from pyjobshop.Solution import Solution
+from simpyjobshop.utils import find_schedule_per_resource
 
 from .Variables import Variables
 
@@ -104,7 +108,9 @@ class Constraints:
         # Map resources to the relevant modes and their demands.
         mapper = [[] for _ in range(data.num_resources)]
         for idx, mode in enumerate(data.modes):
-            for resource, demand in zip(mode.resources, mode.demands):
+            for resource, demand in zip(
+                mode.resources, mode.demands, strict=True
+            ):
                 if demand > 0:
                     mapper[resource].append((idx, demand))
 
@@ -311,6 +317,47 @@ class Constraints:
                     model.add(expr).only_enforce_if(arc)
 
             model.add_circuit(graph)
+
+    def exclude_solution(self, solution: Solution):
+        """
+        Adds constraints to exclude the solution.
+        """
+        sol_id = id(solution)
+
+        # Find bool vars to check if a new mode is present
+        new_mode_vars = []
+        for task in solution.tasks:
+            mode_idx = task.mode
+            mode_var = self._mode_vars[mode_idx]
+            new_mode_vars.append(mode_var.is_present.Not())
+
+        # Find bool vars to check if a new schedule is used
+        schedule = find_schedule_per_resource(solution)
+        new_order_vars = []
+        for res_idx, res_schedule in schedule.items():
+            for task1, task2 in pairwise(res_schedule):
+                data1, data2 = solution.tasks[task1], solution.tasks[task2]
+                if data1.start == data2.start == data1.end == data2.end:
+                    continue  # Ambiguous order of tasks, so skip constraint
+                task_var1 = self._task_vars[task1]
+                task_var2 = self._task_vars[task2]
+                new_order_var = self._model.new_bool_var(
+                    f"sol_{sol_id}_res_{res_idx}_tasks_{task1}_{task2}_order"
+                )
+                twice_midpoint1 = task_var1.start + task_var1.end
+                twice_midpoint2 = task_var2.start + task_var2.end
+                new_order = twice_midpoint1 >= twice_midpoint2
+                self._model.add(new_order).only_enforce_if(new_order_var)
+                new_order_vars.append(new_order_var)
+
+        self._model.add_at_least_one(new_mode_vars + new_order_vars)
+
+    def exclude_solutions(self, solutions: list[Solution]):
+        """
+        Adds constraints to exclude the given solutions.
+        """
+        for solution in solutions:
+            self.exclude_solution(solution)
 
     def add_constraints(self):
         """
