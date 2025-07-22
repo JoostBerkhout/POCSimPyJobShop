@@ -1,3 +1,4 @@
+import math
 import time
 from typing import Tuple, TypedDict
 
@@ -9,23 +10,24 @@ from simpyjobshop.SolutionCallback import SolutionCallback
 from simpyjobshop.utils import init_wandb
 
 
-class StandardSimheuristicConfig(TypedDict):
+class NearOptimaSimulationConfig(TypedDict):
     det_repr: float | str  # float in (0, 1) for a quantile or str "mean"
+    objective_bound_frac: float  # fraction from best objective to simulate
     num_sims: int
     max_size_elite_set: int
-    frac_budget_before_sims: float
+    frac_budget_det_opt: float
     frac_budget_final_elites_sim: float
 
 
-def standard_simheuristic(
+def near_optima_simulation(
     problem: Problem,
-    simh_config: StandardSimheuristicConfig,
+    simh_config: NearOptimaSimulationConfig,
     exp_config: dict[str, int],
     wandb_config: dict[str, str] | None = None,
-    objective_bound: int | None = None,
 ) -> Tuple[SolutionCallback, Result, dict[str, float]]:
     """
-    Runs a standard simheuristic on the given problem.
+    First applies deterministic optimization to find a promising solution.
+    Then it tries to find all near-best solutions and simulate those.
 
     Parameters
     ----------
@@ -37,9 +39,6 @@ def standard_simheuristic(
         Configuration for the experiment (e.g., time limit).
     wandb_config : dict[str, str], optional
         Configuration for Weights & Biases logging, by default None.
-    objective_bound : int, optional
-        Experiment feature. When given, the solver will try to find all
-        solutions with an objective value below this bound.
 
     Returns
     -------
@@ -58,50 +57,60 @@ def standard_simheuristic(
         save_config = {"exp_config": exp_config, "simh_config": simh_config}
         init_wandb(problem_name, save_config, wandb_config)
 
-    start_time_exp = time.time()
     durations = {}
 
     # Init
     time_limit = exp_config["time_limit"]
     det_repr = simh_config["det_repr"]
     num_sims = simh_config["num_sims"]
-    start_time_sims = simh_config["frac_budget_before_sims"] * time_limit
     max_size_elite_set = simh_config["max_size_elite_set"]
+    time_det_opt = simh_config["frac_budget_det_opt"] * time_limit
     time_final_sims = simh_config["frac_budget_final_elites_sim"] * time_limit
+    time_near_optima_sim = time_limit - time_det_opt - time_final_sims
 
     # Generate problem data and build model
     data_generator = problem.build_data_generator()
     data = data_generator.by_key(det_repr)
     model = problem.concrete_model(data)
 
-    # Set objective bound if provided
-    if objective_bound is not None:
-        model.set_objective_bound(objective_bound)
-        msg = "Finding all solutions only works for 1 worker in CP-SAT."
-        assert exp_config["num_workers"] == 1, msg
+    # Solve the problem with deterministic optimization
+    print("Starting deterministic optimization phase...")
+    result = model.solve(
+        display=True,
+        time_limit=time_det_opt,
+        num_workers=exp_config["num_workers"],
+    )
+    best_solution = result.best
+    best_obj_val = result.objective
 
-    # Solve the problem using a callback for stochastic evaluations
+    # Solve problem again to get near best solutions
+    objective_bound_frac = simh_config["objective_bound_frac"]
+    objective_bound = math.ceil(objective_bound_frac * best_obj_val)
+    model.set_objective_bound(objective_bound)
+    start_time_exp = time.time()
     callback = SolutionCallback(
         problem=problem,
         num_sims=num_sims,
         start_time_exp=start_time_exp,
-        start_time_sims=start_time_exp + start_time_sims,
         max_size_elite_set=max_size_elite_set,
-        stop_time=start_time_exp + time_limit - time_final_sims,
-    )
+        stop_time=start_time_exp + time_near_optima_sim,
+        )
+    print("Starting near-optima simulation phase (best = {} and bound = {})...".format(best_obj_val, objective_bound))
     result = model.solve(
         callback=callback,
-        display=False,
+        display=True,
+        initial_solution=best_solution,
         time_limit=time_limit - time_final_sims,
-        num_workers=exp_config["num_workers"],
-        enumerate_all_solutions=objective_bound is not None,
-    )
+        num_workers=1,  # CP-SAT only supports 1 worker for enum_all_sols
+        enumerate_all_solutions=True,
+        )
 
     # Log times
     time_spent = time.time() - start_time_exp
     durations["solver_phase_dur"] = time_spent
 
     # Final simulation of the elite solutions for the remaining time
+    print("Starting final simulation phase...")
     rem_time_final_sims = min(time_final_sims, time_limit - time_spent)
     callback.solutions.simulate_to_time_limit(rem_time_final_sims)
 

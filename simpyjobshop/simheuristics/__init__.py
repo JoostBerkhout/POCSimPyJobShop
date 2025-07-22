@@ -10,6 +10,10 @@ from .iter_det_opt import (
     IterDetOptConfig,
     iter_det_opt,
 )
+from .near_optima_simulation import (
+    NearOptimaSimulationConfig,
+    near_optima_simulation,
+)
 from .simulate_last_solutions import (
     SimulateLastSolutionsConfig,
     simulate_last_solutions,
