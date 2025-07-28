@@ -1,8 +1,8 @@
 from typing import Dict
 
 from pyjobshop import Model, Result, Solution
-from simpyjobshop.problems.Problem import Problem
-from simpyjobshop.utils import find_schedule_per_resource
+from pyjobshop.Solution import find_schedule_per_resource
+from simpyjobshop.problems import Problem
 
 
 def fix_solution(solution: Solution, model: Model) -> Model:

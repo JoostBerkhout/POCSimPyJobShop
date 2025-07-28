@@ -1,6 +1,6 @@
 from pyjobshop import Solution, TaskData
+from pyjobshop.Solution import find_schedule_per_resource
 from simpyjobshop.modeling import find_solution_for_other_data
-from simpyjobshop.utils import find_schedule_per_resource
 from tests.simpyjobshop.problems.OneMachineTwoJobs import OneMachineTwoJobs
 from tests.simpyjobshop.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs
 

@@ -1,7 +1,7 @@
 from typing import Tuple, TypedDict
 
 from pyjobshop import Result
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 from simpyjobshop.simheuristics.standard_simheuristic import (
     StandardSimheuristicConfig,
     standard_simheuristic,

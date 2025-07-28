@@ -8,14 +8,15 @@ import wandb
 from sklearn.linear_model import LinearRegression
 
 from pyjobshop import Result
+from pyjobshop.Solution import find_schedule_per_resource
 from simpyjobshop.modeling import (
     find_result_for_expected_data,
     find_solution_for_other_data,
 )
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 from simpyjobshop.Simulator import Simulator
 from simpyjobshop.SolutionCallback import SolutionCallback
-from simpyjobshop.utils import find_schedule_per_resource, init_wandb
+from simpyjobshop.utils import init_wandb
 
 
 class IterDetOptConfig(TypedDict):

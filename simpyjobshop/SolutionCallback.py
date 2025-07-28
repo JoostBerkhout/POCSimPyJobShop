@@ -3,11 +3,11 @@ import time
 import wandb
 from ortools.sat.python import cp_model
 
+from pyjobshop.Solution import find_schedule_per_resource
 from pyjobshop.solvers.ortools.Solver import Solver
 from simpyjobshop.EliteSet import EliteSet
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 from simpyjobshop.Simulator import Simulator
-from simpyjobshop.utils import find_schedule_per_resource
 
 
 class SolutionCallback(cp_model.CpSolverSolutionCallback):

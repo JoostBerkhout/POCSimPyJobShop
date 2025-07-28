@@ -3,9 +3,9 @@ from typing import Dict
 import pytest
 
 from pyjobshop import Solution, TaskData
+from pyjobshop.Solution import find_schedule_per_resource
 from simpyjobshop.modeling import fix_solution
 from simpyjobshop.SolutionCallback import SolutionCallback
-from simpyjobshop.utils import find_schedule_per_resource
 from tests.simpyjobshop.problems.OneMachineTenJobs import OneMachineTenJobs
 from tests.simpyjobshop.problems.OneMachineTwoJobs import OneMachineTwoJobs
 from tests.simpyjobshop.problems.TwoMachineTwoJobs import TwoMachinesTwoJobs

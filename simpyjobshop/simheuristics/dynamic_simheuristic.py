@@ -6,7 +6,7 @@ import wandb
 
 from pyjobshop import Result
 from simpyjobshop.modeling import find_solution_for_other_data
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 from simpyjobshop.SolutionCallback import SolutionCallback
 from simpyjobshop.utils import init_wandb
 

@@ -2,7 +2,7 @@ from typing import Any, Type
 
 from experiments.utils.SimheuristicSpec import SimheuristicSpec
 from simpyjobshop.modeling import find_result_for_expected_data
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 
 
 def run_experiment(

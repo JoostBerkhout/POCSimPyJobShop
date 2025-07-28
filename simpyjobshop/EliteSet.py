@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict, Iterator, List, Optional
 from tqdm.contrib.concurrent import process_map
 
 from pyjobshop import Solution
+from pyjobshop.Solution import find_schedule_per_resource
 from simpyjobshop.Simulator import Simulator
-from simpyjobshop.utils import find_schedule_per_resource
 
 
 @dataclass

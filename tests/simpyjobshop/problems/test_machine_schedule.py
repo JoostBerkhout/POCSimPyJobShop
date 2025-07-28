@@ -1,4 +1,4 @@
-from simpyjobshop.problems.MachineSchedule import MachineSchedule
+from simpyjobshop.problems import MachineSchedule
 
 
 def test_empty_schedule():

@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import assert_equal
 
+from pyjobshop import Model
 from pyjobshop.constants import MAX_VALUE
-from pyjobshop.Model import Model
 from pyjobshop.ProblemData import (
     Constraint,
     Job,

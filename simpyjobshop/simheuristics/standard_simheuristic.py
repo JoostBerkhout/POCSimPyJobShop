@@ -4,7 +4,7 @@ from typing import Tuple, TypedDict
 import wandb
 
 from pyjobshop import Result
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 from simpyjobshop.SolutionCallback import SolutionCallback
 from simpyjobshop.utils import init_wandb
 

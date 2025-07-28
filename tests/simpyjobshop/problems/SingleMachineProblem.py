@@ -5,7 +5,7 @@ import numpy as np
 
 from pyjobshop import Model
 from simpyjobshop.DiscreteRV import DiscreteRV, SeededPoisson
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 
 
 class SingleMachineProblem(Problem):

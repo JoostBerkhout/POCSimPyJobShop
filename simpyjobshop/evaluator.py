@@ -2,7 +2,7 @@ from typing import Dict
 
 from pyjobshop import Solution
 from simpyjobshop.modeling import fix_solution
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 
 
 def evaluator(

@@ -10,13 +10,13 @@ from .iter_det_opt import (
     IterDetOptConfig,
     iter_det_opt,
 )
-from .near_optima_simulation import (
-    NearOptimaSimulationConfig,
-    near_optima_simulation,
-)
 from .simulate_last_solutions import (
     SimulateLastSolutionsConfig,
     simulate_last_solutions,
+)
+from .simulate_near_optimum import (
+    SimulateNearOptimumConfig,
+    simulate_near_optimum,
 )
 from .standard_simheuristic import (
     StandardSimheuristicConfig,

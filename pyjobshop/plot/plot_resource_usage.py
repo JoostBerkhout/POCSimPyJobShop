@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 
-from pyjobshop.ProblemData import ProblemData
-from pyjobshop.Solution import Solution
+from pyjobshop import ProblemData, Solution
 
 
 def plot_resource_usage(

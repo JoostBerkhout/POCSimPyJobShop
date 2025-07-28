@@ -11,7 +11,7 @@ from experiments.run_experiment import run_experiment_unpack
 from experiments.utils.check_cpu_usage import check_cpu_use
 from experiments.utils.configs_loader import get_configs
 from simpyjobshop import problems
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 
 
 def main(problem: str, problem_cls: Type[Problem]):

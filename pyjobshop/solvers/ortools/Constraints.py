@@ -5,8 +5,7 @@ from ortools.sat.python.cp_model import BoolVarT, CpModel, LinearExpr
 
 import pyjobshop.solvers.utils as utils
 from pyjobshop.ProblemData import Constraint, Machine, ProblemData
-from pyjobshop.Solution import Solution
-from simpyjobshop.utils import find_schedule_per_resource
+from pyjobshop.Solution import Solution, find_schedule_per_resource
 
 from .Variables import Variables
 

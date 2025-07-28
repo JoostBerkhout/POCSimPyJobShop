@@ -1,6 +1,6 @@
 from numpy.testing import assert_equal
 
-from pyjobshop.Model import Model
+from pyjobshop import Model
 from pyjobshop.Solution import Solution, TaskData
 from pyjobshop.solvers.ortools.Solver import Solver
 

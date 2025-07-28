@@ -45,6 +45,7 @@ from algebraic modeling languages. See the `problems` folder for examples.
     4. Run `uv run experiments/submit_slurm_job.py --problem SomeProblemName` to submit the job to the cluster.
     5. Wait for the job to finish. You can check the status of the job with `squeue -u <your_username>`.
     6. Once the job is finished, you can find the results in the `experiments/results` folder. The results are stored in a .csv file with the name of the problem and the date-and-time stamp of when the experiment was run.
+- As an alternative to `uv run` individually for each problem, you can also run `bash experiments/batch_submit_slurm_job.sh` to submit multiple problems at once.
 
 # README.md file for PyJobShop below
 

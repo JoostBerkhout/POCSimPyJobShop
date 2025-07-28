@@ -7,7 +7,7 @@ from tqdm.contrib.concurrent import process_map
 
 from pyjobshop import Solution
 from simpyjobshop.evaluator import evaluator
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 
 
 class Simulator:

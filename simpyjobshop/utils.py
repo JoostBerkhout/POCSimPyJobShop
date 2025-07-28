@@ -3,40 +3,10 @@ import csv
 import wandb
 from matplotlib import pyplot as plt
 
+from pyjobshop import Solution
 from pyjobshop.plot import plot_machine_gantt
-from pyjobshop.Solution import Solution
-from simpyjobshop.problems.Problem import Problem
-
-Schedule = dict[int, list[int]]  # resource idx -> task schedule
-
-
-def find_schedule_per_resource(solution: Solution) -> Schedule:
-    """
-    Returns a Schedule mapping resource indices to schedule of task indices.
-
-    Warning: In case resources can work on multiple tasks at the same time,
-    this function still sets the order based on the midpoints of the tasks
-    despite that it induces no ordering per se.
-    """
-
-    schedule_per_resource: dict[int, list[int]] = {}
-
-    # Group tasks by resource
-    for task_idx, task in enumerate(solution.tasks):
-        for resource_idx in task.resources:
-            if resource_idx not in schedule_per_resource:
-                schedule_per_resource[resource_idx] = []
-            schedule_per_resource[resource_idx].append(task_idx)
-
-    # Sort tasks per resource by their midpoints (start + end) / 2
-    # (to ensure zero duration tasks are sorted correctly)
-    midpoints = [(t.start + t.end) / 2 for t in solution.tasks]
-    for resource_idx, task_indices in schedule_per_resource.items():
-        schedule_per_resource[resource_idx] = sorted(
-            task_indices, key=lambda idx: midpoints[idx]
-        )
-
-    return schedule_per_resource
+from pyjobshop.Solution import find_schedule_per_resource
+from simpyjobshop.problems import Problem
 
 
 def print_solution_schedule(solution: Solution):

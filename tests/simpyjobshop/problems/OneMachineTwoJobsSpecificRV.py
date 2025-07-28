@@ -2,7 +2,7 @@ from typing import Any, Dict, Tuple
 
 from pyjobshop import Model
 from simpyjobshop.DiscreteRV import Constant, CustomRV, DiscreteRV
-from simpyjobshop.problems.Problem import Problem
+from simpyjobshop.problems import Problem
 
 
 class OneMachineTwoJobsSpecificRV(Problem):
