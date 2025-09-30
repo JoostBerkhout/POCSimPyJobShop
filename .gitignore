@@ -424,3 +424,5 @@ old/
 *.png
 *.lock
 experiments/wandb/*
+experiments/results/*
+experiments/notebooks/latex/*

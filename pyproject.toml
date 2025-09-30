@@ -1,21 +1,22 @@
 [project]
-name = "pyjobshop"
-version = "0.0.3a0"
-description = "Solving scheduling problems with constraint programming."
+name = "simpyjobshop"
+version = "0.0.0"
+description = "Solving stochastic scheduling problems with constraint programming."
 authors = [
-    { name = "Leon Lan", email = "l.lan@vu.nl"},
+    { name = "Joost Berkhout", email = "joost.berkhout@vu.nl"},
 ]
 license = { text = "MIT License" }
 readme = "README.md"
 keywords = [
     "scheduling",
+    "stochastic scheduling problems",
     "constraint programming",
     "job shop problem",
 ]
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 3 - Alpha",
     "Topic :: Software Development",
     "Topic :: Scientific/Engineering",
     "License :: OSI Approved :: MIT License",
@@ -39,18 +40,19 @@ dependencies = [
     "ipython>=8.18.1",
     "pyqt5>=5.15.11",
     "scikit-learn>=1.6.1",
+    "pre-commit>=4.3.0",
 ]
 
 
 [project.urls]
-Homepage = "https://pyjobshop.org"
-Documentation = "https://pyjobshop.org"
-Repository = "https://github.com/PyJobShop/PyJobShop"
-Issues = "https://github.com/PyJobShop/PyJobShop/issues"
+Homepage = "TBD"
+Documentation = "TBD"
+Repository = "https://github.com/JoostBerkhout/SimPyJobShop"
+Issues = "https://github.com/JoostBerkhout/SimPyJobShop/issues"
 
 
 [project.scripts]
-pyjobshop = 'pyjobshop:cli.main'
+simpyjobshop = 'simpyjobshop:cli.main'
 
 
 [project.optional-dependencies]
@@ -123,7 +125,7 @@ ignore = [
 
 
 [tool.ruff.lint.isort]
-known-first-party = ["pyjobshop", "tests"]
+known-first-party = ["simpyjobshop", "pyjobshop", "tests"]
 known-third-party = ["ortools"]
 
 
