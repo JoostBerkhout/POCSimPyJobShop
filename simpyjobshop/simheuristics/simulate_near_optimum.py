@@ -83,21 +83,19 @@ def simulate_near_optimum(
         # Solve the problem with deterministic optimization
         callback._log_event(f"remaining time: { remaining_time}s")
         start_time_solver = time.time()
+        excl_sols = [es.solution for es in elite_set]
         result = model.solve(
             display=False,
             time_limit=remaining_time,
             num_workers=exp_config["num_workers"],
-            exclude_solutions=[es.solution for es in elite_set],
+            exclude_solutions=excl_sols,
+            initial_solution=None  # excl_sols[-1] if len(excl_sols) > 0 else None,
         )
         solver_time_spent = time.time() - start_time_solver
         callback._log_event(f"Time spend in solver: {solver_time_spent}s")
-        if result.status != SolveStatus.OPTIMAL:
-            assert result.status in {
-                SolveStatus.INFEASIBLE,
-                SolveStatus.FEASIBLE,
-                SolveStatus.TIME_LIMIT,
-            }
-            break
+        solution_found_status = {SolveStatus.OPTIMAL, SolveStatus.FEASIBLE}
+        if result.status not in solution_found_status:
+            break  # No more solutions
         best_solution = result.best
         best_obj_val = result.objective
 

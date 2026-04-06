@@ -40,3 +40,4 @@ from .ParallelMachines import (
     ParallelMachinesFullStochNoTard,
     ParallelMachinesNoTard,
 )
+from .ParallelMachinesRegrTest import ParallelMachinesSmallRegrTest

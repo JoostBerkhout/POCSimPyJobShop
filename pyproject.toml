@@ -38,9 +38,15 @@ dependencies = [
     "scipy>=1.13.1",
     "wandb>=0.19.0",
     "ipython>=8.18.1",
-    "pyqt5>=5.15.11",
     "scikit-learn>=1.6.1",
     "pre-commit>=4.3.0",
+    "pyqt5>=5.15.11",
+    "notebook>=7.4.7",
+    "openpyxl>=3.1.5",
+    "statsmodels>=0.14.6",
+    "nbconvert>=7.16.6",
+    "pandas-stubs~=2.3.3",
+    "scipy-stubs~=1.15.3",
 ]
 
 
@@ -85,7 +91,7 @@ examples = [
 
 [tool.uv]
 default-groups = ["dev"]
-constraint-dependencies = ["pyqt5-qt5 <=5.15.2"]
+constraint-dependencies = ["pyqt5-qt5 <=5.15.2"] 
 
 
 [tool.uv.sources]
@@ -125,7 +131,7 @@ ignore = [
 
 
 [tool.ruff.lint.isort]
-known-first-party = ["simpyjobshop", "pyjobshop", "tests"]
+known-first-party = ["pyjobshop", "tests"]
 known-third-party = ["ortools"]
 
 

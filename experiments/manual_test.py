@@ -17,9 +17,10 @@ from simpyjobshop.modeling import (
     )
 from simpyjobshop.problems import (
     OpenShop, HybridFlowShop, ParallelMachines, OpenShopNoTard,
+    ParallelMachinesSmallRegrTest,
     )
 from simpyjobshop.problems import OpenShopNoTard, OpenShop
-from simpyjobshop.problems.JobShop import JobShop
+from simpyjobshop.problems.JobShop import JobShop, JobShopNoTard
 from simpyjobshop.problems.JobShopEasy import JobShopEasy
 from simpyjobshop.problems.OpenShopEasy import OpenShopEasy
 from experiments.utils.SimheuristicSpec import SimheuristicSpec
@@ -34,21 +35,23 @@ from simpyjobshop.simheuristics import (
     iter_det_opt,
     )
 
-problem_seed = 15
+problem_seed = 1
 # problem = ParallelMachines(seed=problem_seed)
 # problem = ParallelMachinesSmall(seed=problem_seed)
-problem = OpenShop(seed=problem_seed)
+problem = ParallelMachinesSmallRegrTest()
+# problem = OpenShop(seed=problem_seed)
 # problem = OpenShopNoTard(seed=problem_seed)
 # problem = HybridFlowShop(seed=problem_seed)
 # problem = FlexibleJobShop(seed=problem_seed)
 # problem = OpenShop(seed=problem_seed)
 # problem = JobShop(seed=problem_seed)
+# problem = JobShopNoTard(seed=problem_seed)
 # problem = JobShopEasy(seed=problem_seed)
 # problem = OpenShopEasy(seed=problem_seed)
 
 exp_config = {
-    "time_limit": 20,
-    "num_workers": 8,  # (per instance)
+    "time_limit": 10,
+    "num_workers": 16,  # (per instance)
     "use_wandb": False,
     # only relevant for cli_run_experiments.py and submit_slurm_job.py:
     "num_rand_experiments": None,
@@ -88,7 +91,7 @@ sim_last_config: SimulateLastSolutionsConfig = {
     }
 near_opt_sim_config: SimulateNearOptimumConfig = {
     "det_repr": "mean",
-    "num_sims": 20,
+    "num_sims": 40,
     "max_size_elite_set": 10 ** 10,
     "frac_budget_final_elites_sim": 0,
     }
@@ -98,7 +101,7 @@ near_opt_sim_config: SimulateNearOptimumConfig = {
 #     "frac_budget_final_elites_sim": 0,  # fraction of the time limit for each det opt
 #     }
 simheuristics: list[SimheuristicSpec] = [
-    # SimheuristicSpec("std_simh", standard_simheuristic, std_simh_config),
+    SimheuristicSpec("std_simh", standard_simheuristic, std_simh_config),
     # SimheuristicSpec("det_opt", deterministic_optimization, det_opt_config),
     # SimheuristicSpec("sim_last", simulate_last_solutions, sim_last_config),
     # SimheuristicSpec("dyn_simh", dynamic_simheuristic, dyn_simh_config),
@@ -136,127 +139,129 @@ else:
         "Some elites are simulated and some not. This is not expected."
         )
 
-# Plot all Gantt charts
-_plot_machine_gantt = plot_machine_gantt_for_OS if isinstance(problem, OpenShop) else plot_machine_gantt_with_tardiness
-data_generator = problem.build_data_generator()
-data = data_generator.int_mean()
-model = problem.concrete_model(data)
-for es in elite_solutions:
-    # Find results for elite with expected data
-    exp_data_result = find_result_for_expected_data(es.solution, problem)
-    es.objective = exp_data_result.objective
-    if len(elite_solutions) > 5:
-        break  # skip plotting for large number of solutions
-    _plot_machine_gantt(
-        es.solution,
-        model.data(),
-        plot_labels=False,
-        title=f"CP solution with obj val {es.objective} "
-              f"and mean obj val {es.simulator.mean}"
-        )
-    plt.show()
+# elite_solutions.get_best_mean_solution().simulator.simulate(10000)
 
-elite_solutions.print_summary()
+# # Plot all Gantt charts
+# _plot_machine_gantt = plot_machine_gantt_for_OS if isinstance(problem, OpenShop) else plot_machine_gantt_with_tardiness
+# data_generator = problem.build_data_generator()
+# data = data_generator.int_mean()
+# model = problem.concrete_model(data)
+# for es in elite_solutions:
+#     # Find results for elite with expected data
+#     exp_data_result = find_result_for_expected_data(es.solution, problem)
+#     es.objective = exp_data_result.objective
+#     if len(elite_solutions) > 5:
+#         break  # skip plotting for large number of solutions
+#     _plot_machine_gantt(
+#         es.solution,
+#         model.data(),
+#         plot_labels=False,
+#         title=f"CP solution with obj val {es.objective} "
+#               f"and mean obj val {es.simulator.mean}"
+#         )
+#     plt.show()
+#
+# elite_solutions.print_summary()
+#
+# # Plot objective value vs. mean objective value
+# plt.figure()
+# mean_obj_vals = [es.simulator.mean for es in elite_solutions]
+# obj_vals = [es.objective for es in elite_solutions]
+# plt.plot(obj_vals, mean_obj_vals, "o")
+# plt.xlabel("Objective value")
+# plt.ylabel("Mean objective value")
+# # plt.xlim(8000, 11000)
+# # plt.ylim(8800, 9300)
+# plt.title("Objective value vs. mean objective value")
+# plt.grid()
+# plt.show()
+#
+#
+# def get_all_completion_times(solution: Solution, data: ProblemData):
+#     """
+#     Get all completion times from a solution.
+#     """
+#     completion_times = [0 for _ in range(data.num_jobs)]
+#     for task, task_data in zip(solution.tasks, data.tasks):
+#         job = task_data.job
+#         completion_times[job] = max(completion_times[job], task.end)
+#     return completion_times
+#
+# def get_due_date_slack(data: ProblemData, completion_times: list[int]):
+#     """
+#     Get all due date slack from a solution.
+#     """
+#     slack = [
+#         data.jobs[job].due_date - compl_time
+#         for (job, compl_time) in enumerate(completion_times)
+#         ]
+#     return slack
+#
+#
+# # Plot best solutions
+# best_DCOP_solution = elite_solutions[np.argmin(obj_vals)]
+# best_SCOP_solution = elite_solutions[np.argmin(mean_obj_vals)]
+# for es in [best_DCOP_solution, best_SCOP_solution]:
+#     _plot_machine_gantt(
+#         es.solution,
+#         model.data(),
+#         plot_labels=False,
+#         title=f"CP solution with obj val {es.objective} "
+#               f"and mean obj val {es.simulator.mean}"
+#         )
+#     plt.show()
+#
+# # Plot slacks in scatter plot
+# plt.figure()
+# compl_best_DCOP_solution = get_all_completion_times(best_DCOP_solution.solution, model.data())
+# compl_best_SCOP_solution = get_all_completion_times(best_SCOP_solution.solution, model.data())
+# slack_best_DCOP_solution = get_due_date_slack(model.data(), compl_best_DCOP_solution)
+# slack_best_SCOP_solution = get_due_date_slack(model.data(), compl_best_SCOP_solution)
+# plt.scatter(slack_best_DCOP_solution, slack_best_SCOP_solution)
+# plt.xlabel("Slack of DCOP solution")
+# plt.ylabel("Slack of SCOP solution")
+# plt.title("Slack for each job for DCOP vs. SCOP solutions")
+# # also draw the line y=x
+# plt.plot(
+#     [min(slack_best_DCOP_solution), max(slack_best_SCOP_solution)],
+#     [min(slack_best_DCOP_solution), max(slack_best_SCOP_solution)],
+#     color="red",
+#     linestyle="--",
+#     )
+# plt.grid()
+# plt.show()
+#
+# # Plot simulation results in scatter plot
+# plt.figure()
+# sims_best_DCOP_solution = best_DCOP_solution.simulator.results
+# sims_best_SCOP_solution = best_SCOP_solution.simulator.results
+# plt.scatter(sims_best_DCOP_solution, sims_best_SCOP_solution)
+# plt.xlabel("Simulation result of DCOP solution")
+# plt.ylabel("Simulation result of SCOP solution")
+# plt.title("Simulation results of DCOP vs. SCOP solutions")
+# # also draw the line y=x
+# plt.plot(
+#     [min(sims_best_DCOP_solution), max(sims_best_SCOP_solution)],
+#     [min(sims_best_DCOP_solution), max(sims_best_SCOP_solution)],
+#     color="red",
+#     linestyle="--",
+# )
+# plt.grid()
+# plt.show()
 
-# Plot objective value vs. mean objective value
-plt.figure()
-mean_obj_vals = [es.simulator.mean for es in elite_solutions]
-obj_vals = [es.objective for es in elite_solutions]
-plt.plot(obj_vals, mean_obj_vals, "o")
-plt.xlabel("Objective value")
-plt.ylabel("Mean objective value")
-# plt.xlim(8000, 11000)
-# plt.ylim(8800, 9300)
-plt.title("Objective value vs. mean objective value")
-plt.grid()
-plt.show()
-
-
-def get_all_completion_times(solution: Solution, data: ProblemData):
-    """
-    Get all completion times from a solution.
-    """
-    completion_times = [0 for _ in range(data.num_jobs)]
-    for task, task_data in zip(solution.tasks, data.tasks):
-        job = task_data.job
-        completion_times[job] = max(completion_times[job], task.end)
-    return completion_times
-
-def get_due_date_slack(data: ProblemData, completion_times: list[int]):
-    """
-    Get all due date slack from a solution.
-    """
-    slack = [
-        data.jobs[job].due_date - compl_time
-        for (job, compl_time) in enumerate(completion_times)
-        ]
-    return slack
-
-
-# Plot best solutions
-best_DCOP_solution = elite_solutions[np.argmin(obj_vals)]
-best_SCOP_solution = elite_solutions[np.argmin(mean_obj_vals)]
-for es in [best_DCOP_solution, best_SCOP_solution]:
-    _plot_machine_gantt(
-        es.solution,
-        model.data(),
-        plot_labels=False,
-        title=f"CP solution with obj val {es.objective} "
-              f"and mean obj val {es.simulator.mean}"
-        )
-    plt.show()
-
-# Plot slacks in scatter plot
-plt.figure()
-compl_best_DCOP_solution = get_all_completion_times(best_DCOP_solution.solution, model.data())
-compl_best_SCOP_solution = get_all_completion_times(best_SCOP_solution.solution, model.data())
-slack_best_DCOP_solution = get_due_date_slack(model.data(), compl_best_DCOP_solution)
-slack_best_SCOP_solution = get_due_date_slack(model.data(), compl_best_SCOP_solution)
-plt.scatter(slack_best_DCOP_solution, slack_best_SCOP_solution)
-plt.xlabel("Slack of DCOP solution")
-plt.ylabel("Slack of SCOP solution")
-plt.title("Slack for each job for DCOP vs. SCOP solutions")
-# also draw the line y=x
-plt.plot(
-    [min(slack_best_DCOP_solution), max(slack_best_SCOP_solution)],
-    [min(slack_best_DCOP_solution), max(slack_best_SCOP_solution)],
-    color="red",
-    linestyle="--",
-    )
-plt.grid()
-plt.show()
-
-# Plot simulation results in scatter plot
-plt.figure()
-sims_best_DCOP_solution = best_DCOP_solution.simulator.results
-sims_best_SCOP_solution = best_SCOP_solution.simulator.results
-plt.scatter(sims_best_DCOP_solution, sims_best_SCOP_solution)
-plt.xlabel("Simulation result of DCOP solution")
-plt.ylabel("Simulation result of SCOP solution")
-plt.title("Simulation results of DCOP vs. SCOP solutions")
-# also draw the line y=x
-plt.plot(
-    [min(sims_best_DCOP_solution), max(sims_best_SCOP_solution)],
-    [min(sims_best_DCOP_solution), max(sims_best_SCOP_solution)],
-    color="red",
-    linestyle="--",
-)
-plt.grid()
-plt.show()
-
-# Plot Gantt charts for different simulated data
-for seed in [0]:
-    data = data_generator.random()
-    model = problem.concrete_model(data)
-    for sol in [best_DCOP_solution.solution, best_SCOP_solution.solution]:
-        sol, obj = find_solution_for_other_data(sol, problem, data)
-        _plot_machine_gantt(
-            sol,
-            model.data(),
-            plot_labels=False,
-            title=f"CP solution with obj val {obj} "
-            )
-        plt.show()
+# # Plot Gantt charts for different simulated data
+# for seed in [0]:
+#     data = data_generator.random()
+#     model = problem.concrete_model(data)
+#     for sol in [best_DCOP_solution.solution, best_SCOP_solution.solution]:
+#         sol, obj = find_solution_for_other_data(sol, problem, data)
+#         _plot_machine_gantt(
+#             sol,
+#             model.data(),
+#             plot_labels=False,
+#             title=f"CP solution with obj val {obj} "
+#             )
+#         plt.show()
 
 # # Estimate simulation time
 # num_sims = 100 - elite.simulator.num_sims

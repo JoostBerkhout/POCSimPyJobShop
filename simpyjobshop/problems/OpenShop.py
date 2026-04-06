@@ -120,9 +120,9 @@ class OpenShopBase(Problem):
         constants["seed"] = seed
         for job in range(num_jobs):
             constants[f"due_date_{job}"] = due_dates[job]
-        constants["weight_makespan"] = 0
+        constants["weight_makespan"] = 1
         constants["weight_tardy_jobs"] = 0
-        constants["weight_total_flow_time"] = 1
+        constants["weight_total_flow_time"] = 0
         constants["weight_total_tardiness"] = self.weight_total_tardiness
         constants["weight_total_earliness"] = 0
         constants["weight_max_tardiness"] = 0
