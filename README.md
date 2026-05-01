@@ -1,6 +1,6 @@
 # POCSimPyJobShop
 
-POCSimPyJobShop is a Python library for solving stochastic scheduling problems with constraint programming making use of PyJobShop and simulation. This is a proof of concept (POC) implementation, which is in the earlier stages of development. In this repo, you can also find the code the produced the numerical experiments results and the analysis used for the WSC 2026 paper. For an updated version, please refer to https://github.com/JoostBerkhout/SimPyJobShop. The main goal of this library is to provide a framework for solving stochastic scheduling problems using simheuristics.
+POCSimPyJobShop is a Python library for solving stochastic scheduling problems with constraint programming, using PyJobShop and simulation. This proof-of-concept (POC) implementation is still in an early stage of development. This repository contains the code used to produce the numerical results and analysis for the Winter Simulation Conference 2026 submission. For an updated version of the code, with syntax aligned with the submission example, please refer to https://github.com/JoostBerkhout/SimPyJobShop.
 
 ## Installation
 
@@ -58,7 +58,7 @@ For each stochastic PyJobShop problem the user wants to solve with
 simheuristics, the user has to make a class in subfolder `problems` that
 inherits `Problem`. The user has to overwrite:
 
-- `Problem.conrete_model()` with the concrete model for concrete `data`.
+- `Problem.concrete_model()` with the concrete model for concrete `data`.
 - `Problem.distribution_data()` that returns the distribution and constant data.
 
 It tries to follow the model and data separation paradigm
@@ -76,4 +76,4 @@ from algebraic modeling languages. See the `problems` folder for examples.
     5. Wait for the job to finish. You can check the status of the job with `squeue -u <your_username>`.
     6. Once the job is finished, you can find the results in the `experiments/results` folder. The results are stored in a .csv file with the name of the problem and the date-and-time stamp of when the experiment was run.
 - As an alternative to `uv run` individually for each problem, you can also run `bash experiments/batch_submit_slurm_job.sh` to submit multiple problems at once.
-- An inconsistency slipped into the experiments that does not have severe consequences but is worth mentioning: For the experiments w/ tardiness, the duration means are uniformly drawn from {0, 1, ..., 14}. In contrast, for the experiments w/o tardiness, the duration means are uniformly dranw from {1, 2, ..., 15}. The latter is more consistent as it generates a Poisson distribution with mean > 0, whereas the first generates Poisson distributions with mean = 0, leading to deterministic durations. Since it only affects around 7% of the task durations, it does not have a severe impact on the results. However, for future experiments, it is recommended to use the latter approach for consistency.
+- An inconsistency slipped into the experiments that does not have severe consequences but is worth mentioning: For the experiments w/ tardiness, the duration means are uniformly drawn from {0, 1, ..., 14}. In contrast, for the experiments w/o tardiness, the duration means are uniformly drawn from {1, 2, ..., 15}. The latter is more consistent as it generates a Poisson distribution with mean > 0, whereas the first generates Poisson distributions with mean = 0, leading to deterministic durations. Since it only affects around 7% of the task durations, it does not have a severe impact on the results. However, for future experiments, it is recommended to use the latter approach for consistency.
