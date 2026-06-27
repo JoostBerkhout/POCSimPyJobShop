@@ -270,7 +270,7 @@ def update_scores(
     if best_obj < elite_tracker["best mean"]:
         score_change = simh_config["score_finding_new_best"]
         elite_tracker["best mean"] = best_obj
-        elite_tracker["worst mean"] = worst_obj  # by definition new worst
+        elite_tracker["worst mean"] = worst_obj  # by definition <= old worst
     elif worst_obj < elite_tracker["worst mean"]:
         score_change = simh_config["score_finding_new_elite"]
         elite_tracker["worst mean"] = worst_obj
